@@ -1,74 +1,66 @@
 'use client';
 
+import { HeroSlider } from "@/components/techstream/hero-slider"
 import { Navbar } from "@/components/techstream/navbar"
-import { MobileBottomNav } from "@/components/techstream/mobile-bottom-nav"
-import { useUIStore } from "@/stores/ui-store"
-import { Play, Plus, Star } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { Play, TrendingUp, Film, Tv, Star } from "lucide-react"
 
-const mockData = [
-  { id: '1', title: 'The Last of Us', type: 'series', rating: '8.8', year: '2023', image: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800' },
-  { id: '2', title: 'Dune: Part Two', type: 'movies', rating: '8.7', year: '2024', image: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800' },
-  { id: '3', title: 'UEFA Champions League', type: 'sports', rating: '9.2', year: '2024', image: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=800' },
-  { id: '4', title: 'BBC News Channel', type: 'live', rating: '8.5', year: '2024', image: 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=800' },
+const MOVIES = [
+  { id: '1', title: 'Cyberpunk 2088', image: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=400&auto=format&fit=crop', year: '2025', rating: '4.8' },
+  { id: '2', title: 'The Kingdom of Zanj', image: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=400&auto=format&fit=crop', year: '2026', rating: '5.0' },
+  { id: '3', title: 'Avatar: Way of Water', image: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=400&auto=format&fit=crop', year: '2024', rating: '4.9' },
+  { id: '4', title: 'Interstellar Horizons', image: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=400&auto=format&fit=crop', year: '2024', rating: '4.7' },
 ]
 
-export default function HomePage() {
-  const { activeTab } = useUIStore()
-
-  const filteredData = activeTab === 'home' 
-    ? mockData 
-    : mockData.filter(item => item.type === activeTab)
-
+export default function Home() {
   return (
-    <main className="min-h-screen bg-black text-white pb-24 pt-16">
+    <main className="min-h-screen bg-black text-white pb-20">
       <Navbar />
+      
+      {/* Dynamic Hero Slider */}
+      <HeroSlider />
 
-      {/* Hero Section */}
-      <div className="relative h-[45vh] min-h-[320px] w-full bg-gradient-to-t from-black via-black/40 to-transparent flex items-end p-6">
-        <div className="space-y-3 max-w-xl">
-          <Badge className="bg-tech-red text-white uppercase tracking-wider">{activeTab}</Badge>
-          <h1 className="text-2xl font-extrabold sm:text-4xl">
-            {activeTab === 'home' && 'TechStream Originals'}
-            {activeTab === 'movies' && 'Filamu Maarufu (Movies)'}
-            {activeTab === 'series' && 'Tamthilia (Series)'}
-            {activeTab === 'sports' && 'Michezo Mubashara (Sports)'}
-            {activeTab === 'live' && 'Tv Mubashara (Live Stream)'}
-          </h1>
-          <p className="text-xs sm:text-sm text-gray-300">Tazama maudhui bora ya {activeTab} katika ubora wa HD popote ulipo.</p>
-          <div className="flex items-center gap-3">
-            <Button className="bg-tech-red hover:bg-tech-red/90 gap-2">
-              <Play className="w-4 h-4 fill-white" /> Watch Now
-            </Button>
-            <Button variant="secondary" className="gap-2">
-              <Plus className="w-4 h-4" /> My List
-            </Button>
-          </div>
+      {/* Trending Movies Grid */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 space-y-6">
+        <div className="flex items-center gap-2">
+          <TrendingUp className="w-5 h-5 text-red-500" />
+          <h2 className="text-xl font-bold tracking-tight">Inayovuma Hivi Sasa</h2>
         </div>
-      </div>
 
-      {/* Content Section */}
-      <div className="px-4 space-y-4 mt-4">
-        <h2 className="text-lg font-bold capitalize">{activeTab === 'home' ? 'Trending Now' : `${activeTab} Category`}</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          {filteredData.map((item) => (
-            <div key={item.id} className="group relative rounded-xl overflow-hidden bg-card/40 border border-border">
-              <img src={item.image} alt={item.title} className="w-full h-40 object-cover group-hover:scale-105 transition-transform" />
-              <div className="p-3 space-y-1">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-tech-red font-bold uppercase">{item.type}</span>
-                  <span className="text-[10px] flex items-center gap-1 text-yellow-400"><Star className="w-3 h-3 fill-yellow-400" /> {item.rating}</span>
+          {MOVIES.map((movie) => (
+            <div 
+              key={movie.id} 
+              className="group relative rounded-2xl overflow-hidden bg-white/5 border border-white/10 hover:border-red-500/50 transition duration-300 cursor-pointer"
+            >
+              <div className="aspect-[2/3] w-full relative overflow-hidden">
+                <img 
+                  src={movie.image} 
+                  alt={movie.title} 
+                  className="w-full h-full object-cover group-hover:scale-110 transition duration-500" 
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80" />
+                
+                {/* Play Icon Hover Overlay */}
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/40 backdrop-blur-xs transition duration-300">
+                  <div className="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center shadow-lg shadow-red-600/50 transform group-hover:scale-110 transition">
+                    <Play className="w-6 h-6 fill-white text-white ml-0.5" />
+                  </div>
                 </div>
-                <h3 className="font-semibold text-xs truncate">{item.title}</h3>
-                <p className="text-[10px] text-muted-foreground">{item.year}</p>
+              </div>
+
+              <div className="p-3 space-y-1">
+                <h3 className="font-semibold text-sm truncate group-hover:text-red-400 transition">{movie.title}</h3>
+                <div className="flex justify-between items-center text-xs text-gray-400">
+                  <span>{movie.year}</span>
+                  <span className="flex items-center text-amber-400 font-bold">
+                    <Star className="w-3 h-3 fill-amber-400 mr-1" /> {movie.rating}
+                  </span>
+                </div>
               </div>
             </div>
           ))}
         </div>
       </div>
-
-      <MobileBottomNav />
     </main>
   )
 }
