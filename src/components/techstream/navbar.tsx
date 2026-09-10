@@ -1,7 +1,7 @@
-"use client"
+'use client';
 
 import Link from "next/link"
-import { Play, Search, Bell, User, Menu, Home, Film, Tv, Trophy, Radio, Heart, List } from "lucide-react"
+import { Play, Search, Bell, User, Home, Film, Tv, Trophy, Radio } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -11,7 +11,7 @@ import { useProfileStore } from "@/stores/profile-store"
 
 export function Navbar() {
   const { activeTab, setActiveTab, setSearchOpen } = useUIStore()
-  const { user, isAuthenticated } = useAuthStore()
+  const { isAuthenticated } = useAuthStore()
   const { currentProfile } = useProfileStore()
 
   const navItems = [
@@ -23,10 +23,9 @@ export function Navbar() {
   ]
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-border">
+    <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-border bg-black/80 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo and Navigation */}
           <div className="flex items-center gap-8">
             <Link href="/" className="flex items-center gap-2 group">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-tech-red to-tech-blue flex items-center justify-center">
@@ -35,53 +34,57 @@ export function Navbar() {
               <span className="text-xl font-bold gradient-text">TechStream</span>
             </Link>
 
-            {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-1">
               {navItems.map((item) => {
                 const Icon = item.icon
                 return (
                   <Button
                     key={item.id}
+                    asChild
                     variant={activeTab === item.id ? "default" : "ghost"}
                     size="sm"
-                    onClick={() => setActiveTab(item.id)}
                     className="gap-2"
                   >
-                    <Icon className="w-4 h-4" />
-                    {item.label}
+                    <Link href={item.href} onClick={() => setActiveTab(item.id)}>
+                      <Icon className="w-4 h-4" />
+                      {item.label}
+                    </Link>
                   </Button>
                 )
               })}
             </div>
           </div>
 
-          {/* Right side */}
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setSearchOpen(true)}
-              className="hidden sm:flex"
+              className="flex"
             >
               <Search className="w-5 h-5" />
             </Button>
 
-            <Button variant="ghost" size="icon" className="hidden sm:flex">
+            <Button variant="ghost" size="icon" className="hidden sm:flex relative">
               <Bell className="w-5 h-5" />
               <Badge className="absolute top-2 right-2 h-2 w-2 p-0 bg-tech-red" />
             </Button>
 
             {isAuthenticated && currentProfile ? (
-              <Avatar className="h-9 w-9 cursor-pointer border-2 border-tech-red">
-                <AvatarImage src={currentProfile.avatar} />
-                <AvatarFallback className="bg-tech-red text-white">
-                  {currentProfile.name.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
+              <Link href="/profile">
+                <Avatar className="h-9 w-9 cursor-pointer border-2 border-tech-red">
+                  <AvatarImage src={currentProfile.avatar} />
+                  <AvatarFallback className="bg-tech-red text-white">
+                    {currentProfile.name.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              </Link>
             ) : (
-              <Button variant="default" size="sm">
-                <User className="w-4 h-4 mr-2" />
-                Sign In
+              <Button variant="default" size="sm" asChild>
+                <Link href="/auth">
+                  <User className="w-4 h-4 mr-2" />
+                  Sign In
+                </Link>
               </Button>
             )}
           </div>
@@ -89,4 +92,3 @@ export function Navbar() {
       </div>
     </nav>
   )
-}
