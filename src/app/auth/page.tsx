@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { useAuthStore } from "@/stores/auth-store"
+import { useProfileStore } from "@/stores/profile-store"
 import Link from "next/link"
 
 export default function AuthPage() {
@@ -15,13 +16,14 @@ export default function AuthPage() {
   const [password, setPassword] = useState("")
   const [name, setName] = useState("")
   const { login } = useAuthStore()
+  const { setProfile } = useProfileStore()
   const router = useRouter()
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (login) {
-      login({ id: '1', email, name: name || 'User' })
-    }
+    const userName = name.trim() || email.split('@')[0] || 'User'
+    login({ id: '1', email, name: userName })
+    setProfile({ id: '1', name: userName, avatar: '' })
     router.push('/')
   }
 

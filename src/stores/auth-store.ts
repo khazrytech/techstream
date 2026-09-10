@@ -1,22 +1,19 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+'use client';
 
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  avatar?: string;
-  role: string;
+import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
+
+interface User {
+  id: string
+  email: string
+  name: string
 }
 
-export interface AuthState {
-  user: User | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  token: string | null;
-  setAuth: (user: User, token: string) => void;
-  logout: () => void;
-  setLoading: (loading: boolean) => void;
+interface AuthState {
+  user: User | null
+  isAuthenticated: boolean
+  login: (user: User) => void
+  logout: () => void
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -24,17 +21,19 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       user: null,
       isAuthenticated: false,
-      isLoading: false,
-      token: null,
-      setAuth: (user, token) =>
-        set({ user, token, isAuthenticated: true, isLoading: false }),
+      login: (userData) =>
+        set({
+          user: userData,
+          isAuthenticated: true,
+        }),
       logout: () =>
-        set({ user: null, token: null, isAuthenticated: false, isLoading: false }),
-      setLoading: (isLoading) => set({ isLoading }),
+        set({
+          user: null,
+          isAuthenticated: false,
+        }),
     }),
     {
-      name: 'techstream-auth',
-      partialize: (state) => ({ user: state.user, token: state.token, isAuthenticated: state.isAuthenticated }),
+      name: 'techstream-auth-storage',
     }
   )
-);
+)
