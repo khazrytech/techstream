@@ -67,7 +67,6 @@ export const useAuthStore = create<AuthState>()(
         devices: [
           { id: 'dev-1', name: 'Samsung Galaxy A54 (Simu Hii)', type: 'Mobile App', lastActive: 'Sasa Hivi', current: true },
           { id: 'dev-2', name: 'LG Smart TV 55"', type: 'Smart TV', lastActive: 'Jana, 21:40', current: false },
-          { id: 'dev-3', name: 'Chrome Browser (Windows)', type: 'Web Browser', lastActive: 'Siku 3 zilizopita', current: false },
         ],
         settings: {
           autoPlay: true,

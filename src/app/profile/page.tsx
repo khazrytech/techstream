@@ -8,23 +8,16 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card } from "@/components/ui/card"
 import { 
   ArrowLeft, LogOut, Settings, Shield, Crown, Film, 
-  Check, Edit3, Smartphone, Monitor, Heart,
-  Clock, Trash2, Key, CheckCircle2, Play
+  Edit3, Smartphone, Heart, Clock, Play
 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-
-const AVATAR_PRESETS = [
-  'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=250&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?q=80&w=250&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=250&auto=format&fit=crop',
-]
 
 export default function ProfilePage() {
   const [mounted, setMounted] = useState(false)
   const [activeTab, setActiveTab] = useState<'overview' | 'profile' | 'watchlist' | 'subscription' | 'devices' | 'settings' | 'security'>('overview')
   
-  const { user, isAuthenticated, logout, updateProfile, toggleSetting, setVideoQuality, removeFromWatchlist, removeDevice } = useAuthStore()
+  const { user, isAuthenticated, logout, updateProfile } = useAuthStore()
   const router = useRouter()
 
   const [editName, setEditName] = useState("")
@@ -34,12 +27,15 @@ export default function ProfilePage() {
   useEffect(() => {
     setMounted(true)
     if (user) {
-      setEditName(user.name)
-      setEditPhone(user.phone || '')
+      setEditName(user.name || "")
+      setEditPhone(user.phone || "")
     }
   }, [user])
 
-  if (!mounted) return <div className="min-h-screen bg-black" />
+  // Zuia client-side render kabla ya component haijapanda vizuri kwenye browser
+  if (!mounted) {
+    return <div className="min-h-screen bg-black" />
+  }
 
   if (!isAuthenticated || !user) {
     return (
@@ -49,7 +45,7 @@ export default function ProfilePage() {
           <h2 className="text-2xl font-bold mb-2">Hujaingia Kwenye Akaunti</h2>
           <p className="text-gray-400 text-sm mb-6">Tafadhali ingia au jisajili ili kutazama profile yako.</p>
           <Button asChild className="bg-red-600 hover:bg-red-700 text-white w-full rounded-2xl h-12 font-bold">
-            <Link href="/auth">Ingia Akaunti Sasa</Link>
+            <Link href="/">Rudi Mwanzo</Link>
           </Button>
         </Card>
       </div>
@@ -71,7 +67,7 @@ export default function ProfilePage() {
           <span className="font-semibold text-sm">Rudi Nyumbani</span>
         </Link>
         <span className="text-xs bg-gradient-to-r from-red-600 to-amber-500 text-white font-black px-3 py-1 rounded-full uppercase tracking-wider">
-          {user.plan} MEMBER
+          {user.plan || 'VIP'} MEMBER
         </span>
       </div>
 
@@ -80,7 +76,7 @@ export default function ProfilePage() {
           <Avatar className="h-24 w-24 border-2 border-red-600 ring-4 ring-red-600/20 shadow-2xl">
             <AvatarImage src={user.avatar} />
             <AvatarFallback className="bg-red-600 text-white text-3xl font-bold">
-              {user.name.charAt(0).toUpperCase()}
+              {user.name ? user.name.charAt(0).toUpperCase() : 'T'}
             </AvatarFallback>
           </Avatar>
 
@@ -93,15 +89,15 @@ export default function ProfilePage() {
             
             <div className="pt-2 grid grid-cols-3 gap-2 sm:gap-4 max-w-md">
               <div className="bg-white/5 border border-white/10 p-2.5 rounded-2xl text-center">
-                <p className="text-lg font-black text-red-500">{user.stats.hoursWatched}h</p>
+                <p className="text-lg font-black text-red-500">{user.stats?.hoursWatched || 0}h</p>
                 <p className="text-[10px] text-gray-400 uppercase font-semibold">Saa za Stream</p>
               </div>
               <div className="bg-white/5 border border-white/10 p-2.5 rounded-2xl text-center">
-                <p className="text-lg font-black text-amber-400">{user.stats.moviesCompleted}</p>
+                <p className="text-lg font-black text-amber-400">{user.stats?.moviesCompleted || 0}</p>
                 <p className="text-[10px] text-gray-400 uppercase font-semibold">Zilizokamilika</p>
               </div>
               <div className="bg-white/5 border border-white/10 p-2.5 rounded-2xl text-center">
-                <p className="text-lg font-black text-green-400">{user.watchlist.length}</p>
+                <p className="text-lg font-black text-green-400">{user.watchlist?.length || 0}</p>
                 <p className="text-[10px] text-gray-400 uppercase font-semibold">Watchlist</p>
               </div>
             </div>
@@ -114,9 +110,6 @@ export default function ProfilePage() {
           { id: 'overview', label: 'Overview', icon: Film },
           { id: 'profile', label: 'Hariri Profile', icon: Edit3 },
           { id: 'watchlist', label: 'Watchlist', icon: Heart },
-          { id: 'subscription', label: 'VIP Packages', icon: Crown },
-          { id: 'devices', label: 'Vifaa', icon: Smartphone },
-          { id: 'settings', label: 'Mipangilio', icon: Settings },
           { id: 'security', label: 'Ulinzi', icon: Shield },
         ].map((tab) => {
           const Icon = tab.icon
@@ -142,7 +135,7 @@ export default function ProfilePage() {
             <Clock className="w-5 h-5 text-red-500" /> Endelea Kutazama
           </h3>
           <div className="grid sm:grid-cols-2 gap-4">
-            {user.history.map((item) => (
+            {user.history?.map((item) => (
               <div key={item.id} className="bg-white/5 border border-white/10 rounded-2xl p-3 flex gap-4 items-center">
                 <div className="relative w-24 h-16 rounded-xl overflow-hidden shrink-0">
                   <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
@@ -198,7 +191,7 @@ export default function ProfilePage() {
             className="w-full bg-red-600/20 text-red-400 border border-red-500/30 hover:bg-red-600 hover:text-white rounded-2xl h-12 font-bold gap-2"
             onClick={() => {
               logout()
-              router.push('/auth')
+              router.push('/')
             }}
           >
             <LogOut className="w-5 h-5" /> Toka Kwenye Akaunti
