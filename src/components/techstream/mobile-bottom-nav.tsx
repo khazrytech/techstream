@@ -1,74 +1,41 @@
-"use client"
+'use client';
 
-import { Home, Search, Trophy, Heart, User, Menu } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import Link from "next/link"
+import { Home, Film, Tv, Trophy, Radio } from "lucide-react"
 import { useUIStore } from "@/stores/ui-store"
-import { useAuthStore } from "@/stores/auth-store"
-import { Badge } from "@/components/ui/badge"
 
 export function MobileBottomNav() {
-  const { activeTab, setActiveTab, setSearchOpen } = useUIStore()
-  const { isAuthenticated } = useAuthStore()
+  const { activeTab, setActiveTab } = useUIStore()
+
+  const navItems = [
+    { id: 'home' as const, label: 'Home', icon: Home, href: '/' },
+    { id: 'movies' as const, label: 'Movies', icon: Film, href: '/' },
+    { id: 'series' as const, label: 'Series', icon: Tv, href: '/' },
+    { id: 'sports' as const, label: 'Sports', icon: Trophy, href: '/' },
+    { id: 'live' as const, label: 'Live', icon: Radio, href: '/' },
+  ]
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-border md:hidden">
-      <div className="flex items-center justify-around h-16 px-4">
-        <Button
-          variant={activeTab === 'home' ? "default" : "ghost"}
-          size="icon"
-          onClick={() => setActiveTab('home')}
-          className="flex-1"
-        >
-          <Home className="w-5 h-5" />
-        </Button>
-
-        <Button
-          variant={activeTab === 'movies' || activeTab === 'series' ? "default" : "ghost"}
-          size="icon"
-          onClick={() => setActiveTab('movies')}
-          className="flex-1"
-        >
-          <Menu className="w-5 h-5" />
-        </Button>
-
-        <Button
-          variant={activeTab === 'sports' ? "default" : "ghost"}
-          size="icon"
-          onClick={() => setActiveTab('sports')}
-          className="flex-1"
-        >
-          <Trophy className="w-5 h-5" />
-        </Button>
-
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setSearchOpen(true)}
-          className="flex-1"
-        >
-          <Search className="w-5 h-5" />
-        </Button>
-
-        {isAuthenticated ? (
-          <Button
-            variant={activeTab === 'mylist' ? "default" : "ghost"}
-            size="icon"
-            onClick={() => setActiveTab('mylist')}
-            className="flex-1"
-          >
-            <Heart className="w-5 h-5" />
-          </Button>
-        ) : (
-          <Button
-            variant={activeTab === 'profile' ? "default" : "ghost"}
-            size="icon"
-            onClick={() => setActiveTab('profile')}
-            className="flex-1"
-          >
-            <User className="w-5 h-5" />
-          </Button>
-        )}
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass border-t border-border bg-black/90 backdrop-blur-lg px-2 py-2">
+      <div className="flex items-center justify-around">
+        {navItems.map((item) => {
+          const Icon = item.icon
+          const isActive = activeTab === item.id
+          return (
+            <Link
+              key={item.id}
+              href={item.href}
+              onClick={() => setActiveTab(item.id)}
+              className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-colors ${
+                isActive ? 'text-tech-red font-semibold' : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Icon className="w-5 h-5" />
+              <span className="text-[10px]">{item.label}</span>
+            </Link>
+          )
+        })}
       </div>
-    </nav>
+    </div>
   )
 }
