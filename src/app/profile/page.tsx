@@ -1,7 +1,7 @@
 'use client';
 
+import { useState, useEffect } from 'react'
 import { useAuthStore } from "@/stores/auth-store"
-import { useProfileStore } from "@/stores/profile-store"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,13 +10,19 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 
 export default function ProfilePage() {
+  const [mounted, setMounted] = useState(false)
   const { isAuthenticated, logout, user } = useAuthStore()
-  const { currentProfile } = useProfileStore()
   const router = useRouter()
 
-  if (!isAuthenticated) {
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) return <div className="min-h-screen bg-black" />
+
+  if (!isAuthenticated || !user) {
     return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen bg-black flex flex-col justify-center items-center p-4">
         <Card className="w-full max-w-md border-border bg-card/50">
           <CardHeader className="text-center">
             <CardTitle className="text-white">Hujaingia Kwenye Akaunti</CardTitle>
@@ -45,14 +51,14 @@ export default function ProfilePage() {
       <Card className="border-border bg-card/50 backdrop-blur-md">
         <CardContent className="p-6 flex items-center gap-4">
           <Avatar className="h-16 w-16 border-2 border-tech-red">
-            <AvatarImage src={currentProfile?.avatar} />
-            <AvatarFallback className="bg-tech-red text-white text-xl">
-              {(currentProfile?.name || user?.name || "U").charAt(0).toUpperCase()}
+            <AvatarImage src={user.avatar} />
+            <AvatarFallback className="bg-tech-red text-white text-xl font-bold">
+              {(user.name || "U").charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div className="space-y-1">
-            <h2 className="text-xl font-bold">{currentProfile?.name || user?.name || "User"}</h2>
-            <p className="text-sm text-muted-foreground">{user?.email || "user@techstream.com"}</p>
+            <h2 className="text-xl font-bold">{user.name}</h2>
+            <p className="text-sm text-muted-foreground">{user.email}</p>
           </div>
         </CardContent>
       </Card>
@@ -74,7 +80,7 @@ export default function ProfilePage() {
           variant="destructive"
           className="w-full justify-start gap-3 h-12 text-left mt-6"
           onClick={() => {
-            if (logout) logout()
+            logout()
             router.push('/auth')
           }}
         >

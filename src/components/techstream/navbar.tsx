@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react'
 import Link from "next/link"
 import { Play, Search, Bell, User, Home, Film, Tv, Trophy, Radio } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -7,12 +8,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { useUIStore } from "@/stores/ui-store"
 import { useAuthStore } from "@/stores/auth-store"
-import { useProfileStore } from "@/stores/profile-store"
 
 export function Navbar() {
+  const [mounted, setMounted] = useState(false)
   const { activeTab, setActiveTab, setSearchOpen } = useUIStore()
-  const { isAuthenticated } = useAuthStore()
-  const { currentProfile } = useProfileStore()
+  const { user, isAuthenticated } = useAuthStore()
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const navItems = [
     { id: 'home' as const, label: 'Home', icon: Home, href: '/' },
@@ -70,12 +74,12 @@ export function Navbar() {
               <Badge className="absolute top-2 right-2 h-2 w-2 p-0 bg-tech-red" />
             </Button>
 
-            {isAuthenticated && currentProfile ? (
+            {mounted && isAuthenticated && user ? (
               <Link href="/profile">
                 <Avatar className="h-9 w-9 cursor-pointer border-2 border-tech-red">
-                  <AvatarImage src={currentProfile.avatar} />
-                  <AvatarFallback className="bg-tech-red text-white">
-                    {currentProfile.name.charAt(0).toUpperCase()}
+                  <AvatarImage src={user.avatar || ''} />
+                  <AvatarFallback className="bg-tech-red text-white font-bold">
+                    {(user.name || user.email || 'U').charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
               </Link>
