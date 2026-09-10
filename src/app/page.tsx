@@ -1,174 +1,74 @@
-"use client"
+'use client';
 
 import { Navbar } from "@/components/techstream/navbar"
 import { MobileBottomNav } from "@/components/techstream/mobile-bottom-nav"
-import { HeroCarousel } from "@/components/techstream/hero-carousel"
-import { ContentRow } from "@/components/techstream/content-row"
-import { MovieCard } from "@/components/techstream/movie-card"
-import { SeriesCard } from "@/components/techstream/series-card"
-import {
-  heroSlides,
-  movies,
-  series,
-  continueWatching,
-  africanMovies,
-} from "@/lib/sample-data"
+import { useUIStore } from "@/stores/ui-store"
+import { Play, Plus, Star } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 
-export default function Home() {
+const mockData = [
+  { id: '1', title: 'The Last of Us', type: 'series', rating: '8.8', year: '2023', image: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800' },
+  { id: '2', title: 'Dune: Part Two', type: 'movies', rating: '8.7', year: '2024', image: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800' },
+  { id: '3', title: 'UEFA Champions League', type: 'sports', rating: '9.2', year: '2024', image: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=800' },
+  { id: '4', title: 'BBC News Channel', type: 'live', rating: '8.5', year: '2024', image: 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=800' },
+]
+
+export default function HomePage() {
+  const { activeTab } = useUIStore()
+
+  const filteredData = activeTab === 'home' 
+    ? mockData 
+    : mockData.filter(item => item.type === activeTab)
+
   return (
-    <div className="min-h-screen bg-background">
+    <main className="min-h-screen bg-black text-white pb-24 pt-16">
       <Navbar />
-      <main className="pt-16 pb-20 md:pb-0">
-        {/* Hero Carousel */}
-        <HeroCarousel slides={heroSlides} />
 
-        {/* Content Sections */}
-        <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-16 -mt-20 relative z-10 space-y-8">
-          {/* Continue Watching */}
-          {continueWatching.length > 0 && (
-            <ContentRow title="Continue Watching">
-              {continueWatching.map((item) => (
-                <div key={item.id} className="flex-none w-[160px] md:w-[200px]">
-                  {item.type === 'series' ? (
-                    <SeriesCard {...item} />
-                  ) : (
-                    <MovieCard {...item} />
-                  )}
-                </div>
-              ))}
-            </ContentRow>
-          )}
-
-          {/* Trending Now */}
-          <ContentRow title="Trending Now" seeAllHref="/trending">
-            {[...movies.slice(0, 3), ...series.slice(0, 3)].map((item) => (
-              <div key={item.id} className="flex-none w-[160px] md:w-[200px]">
-                {('seasons' in item) ? (
-                  <SeriesCard {...item} />
-                ) : (
-                  <MovieCard {...item} />
-                )}
-              </div>
-            ))}
-          </ContentRow>
-
-          {/* Latest Movies */}
-          <ContentRow title="Latest Movies" seeAllHref="/movies?sort=latest">
-            {movies.slice(0, 6).map((movie) => (
-              <div key={movie.id} className="flex-none w-[160px] md:w-[200px]">
-                <MovieCard {...movie} />
-              </div>
-            ))}
-          </ContentRow>
-
-          {/* Popular Series */}
-          <ContentRow title="Popular Series" seeAllHref="/series?sort=popular">
-            {series.slice(0, 6).map((seriesItem) => (
-              <div key={seriesItem.id} className="flex-none w-[160px] md:w-[200px]">
-                <SeriesCard {...seriesItem} />
-              </div>
-            ))}
-          </ContentRow>
-
-          {/* African Movies */}
-          <ContentRow title="African Movies" seeAllHref="/movies?region=africa">
-            {africanMovies.map((movie) => (
-              <div key={movie.id} className="flex-none w-[160px] md:w-[200px]">
-                <MovieCard {...movie} />
-              </div>
-            ))}
-          </ContentRow>
-
-          {/* TechStream Originals */}
-          <ContentRow title="TechStream Originals" seeAllHref="/originals">
-            {series.filter(s => s.isOriginal).map((seriesItem) => (
-              <div key={seriesItem.id} className="flex-none w-[160px] md:w-[200px]">
-                <SeriesCard {...seriesItem} />
-              </div>
-            ))}
-          </ContentRow>
-
-          {/* Top Rated */}
-          <ContentRow title="Top Rated" seeAllHref="/top-rated">
-            {[...movies, ...series]
-              .sort((a, b) => b.rating - a.rating)
-              .slice(0, 6)
-              .map((item) => (
-                <div key={item.id} className="flex-none w-[160px] md:w-[200px]">
-                  {('seasons' in item) ? (
-                    <SeriesCard {...item} />
-                  ) : (
-                    <MovieCard {...item} />
-                  )}
-                </div>
-              ))}
-          </ContentRow>
-
-          {/* Recommended For You */}
-          <ContentRow title="Recommended For You">
-            {[...movies.slice(3), ...series.slice(3)].slice(0, 6).map((item) => (
-              <div key={item.id} className="flex-none w-[160px] md:w-[200px]">
-                {('seasons' in item) ? (
-                  <SeriesCard {...item} />
-                ) : (
-                  <MovieCard {...item} />
-                )}
-              </div>
-            ))}
-          </ContentRow>
+      {/* Hero Section */}
+      <div className="relative h-[45vh] min-h-[320px] w-full bg-gradient-to-t from-black via-black/40 to-transparent flex items-end p-6">
+        <div className="space-y-3 max-w-xl">
+          <Badge className="bg-tech-red text-white uppercase tracking-wider">{activeTab}</Badge>
+          <h1 className="text-2xl font-extrabold sm:text-4xl">
+            {activeTab === 'home' && 'TechStream Originals'}
+            {activeTab === 'movies' && 'Filamu Maarufu (Movies)'}
+            {activeTab === 'series' && 'Tamthilia (Series)'}
+            {activeTab === 'sports' && 'Michezo Mubashara (Sports)'}
+            {activeTab === 'live' && 'Tv Mubashara (Live Stream)'}
+          </h1>
+          <p className="text-xs sm:text-sm text-gray-300">Tazama maudhui bora ya {activeTab} katika ubora wa HD popote ulipo.</p>
+          <div className="flex items-center gap-3">
+            <Button className="bg-tech-red hover:bg-tech-red/90 gap-2">
+              <Play className="w-4 h-4 fill-white" /> Watch Now
+            </Button>
+            <Button variant="secondary" className="gap-2">
+              <Plus className="w-4 h-4" /> My List
+            </Button>
+          </div>
         </div>
-      </main>
+      </div>
 
-      {/* Mobile Bottom Navigation */}
+      {/* Content Section */}
+      <div className="px-4 space-y-4 mt-4">
+        <h2 className="text-lg font-bold capitalize">{activeTab === 'home' ? 'Trending Now' : `${activeTab} Category`}</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          {filteredData.map((item) => (
+            <div key={item.id} className="group relative rounded-xl overflow-hidden bg-card/40 border border-border">
+              <img src={item.image} alt={item.title} className="w-full h-40 object-cover group-hover:scale-105 transition-transform" />
+              <div className="p-3 space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-tech-red font-bold uppercase">{item.type}</span>
+                  <span className="text-[10px] flex items-center gap-1 text-yellow-400"><Star className="w-3 h-3 fill-yellow-400" /> {item.rating}</span>
+                </div>
+                <h3 className="font-semibold text-xs truncate">{item.title}</h3>
+                <p className="text-[10px] text-muted-foreground">{item.year}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <MobileBottomNav />
-
-      {/* Footer */}
-      <footer className="bg-oled-dark border-t border-border mt-12 py-8 px-4 md:px-8 lg:px-16">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <h3 className="font-semibold mb-4 text-sm uppercase tracking-wider">TechStream</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition-colors">About Us</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Careers</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Press</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Blog</a></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4 text-sm uppercase tracking-wider">Support</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition-colors">Help Center</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Contact Us</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Devices</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Accessibility</a></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4 text-sm uppercase tracking-wider">Legal</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition-colors">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Cookie Policy</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Copyright</a></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4 text-sm uppercase tracking-wider">Connect</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition-colors">Facebook</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Twitter</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Instagram</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">YouTube</a></li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-border pt-8 text-center text-sm text-muted-foreground">
-            <p>© 2024 TechStream. All rights reserved.</p>
-            <p className="mt-2">Stream Everything. Experience More.</p>
-          </div>
-        </div>
-      </footer>
-    </div>
+    </main>
   )
 }
