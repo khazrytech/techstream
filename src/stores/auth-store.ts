@@ -9,7 +9,7 @@ export interface UserProfile {
   name: string
   phone: string
   avatar: string
-  plan: 'Free VIP' | 'VIP Pro' | 'Ultra 4K Stream'
+  plan: 'Free' | 'VIP Pro' | 'Ultra 4K Stream'
   stats: {
     hoursWatched: number
     moviesCompleted: number
@@ -34,6 +34,7 @@ interface AuthState {
   login: (email: string, name?: string) => void
   logout: () => void
   updateProfile: (data: Partial<UserProfile>) => void
+  upgradePlan: (plan: 'Free' | 'VIP Pro' | 'Ultra 4K Stream') => void
   toggleSetting: (key: keyof UserProfile['settings']) => void
   setVideoQuality: (quality: UserProfile['settings']['videoQuality']) => void
   removeFromWatchlist: (id: string) => void
@@ -45,32 +46,29 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       user: {
         id: '1',
-        name: 'Techboy TZ',
-        email: 'hackertrick1997@gmail.com',
-        phone: '+255 712 345 678',
+        name: 'Mtumiaji wa TechStream',
+        email: 'user@techstream.tz',
+        phone: '+255 712 000 000',
         avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=250&auto=format&fit=crop',
-        plan: 'VIP Pro',
+        plan: 'Free', // Anaanza na Free mpaka afanye malipo
         stats: {
-          hoursWatched: 142,
-          moviesCompleted: 38,
-          watchlistCount: 12
+          hoursWatched: 12,
+          moviesCompleted: 3,
+          watchlistCount: 5
         },
         watchlist: [
           { id: '1', title: 'Cyberpunk 2088', image: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=400&auto=format&fit=crop', category: 'Sci-Fi', rating: '4.8' },
           { id: '2', title: 'The Kingdom of Zanj', image: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=400&auto=format&fit=crop', category: 'Action', rating: '5.0' },
-          { id: '3', title: 'Avatar: Way of Water', image: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=400&auto=format&fit=crop', category: 'Adventure', rating: '4.9' },
         ],
         history: [
           { id: '1', title: 'Avatar: The Way of Water', image: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=400&auto=format&fit=crop', progress: 75, duration: '2h 15m left' },
-          { id: '2', title: 'Cyberpunk 2088 Episode 4', image: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=400&auto=format&fit=crop', progress: 30, duration: '40m left' },
         ],
         devices: [
-          { id: 'dev-1', name: 'Samsung Galaxy A54 (Simu Hii)', type: 'Mobile App', lastActive: 'Sasa Hivi', current: true },
-          { id: 'dev-2', name: 'LG Smart TV 55"', type: 'Smart TV', lastActive: 'Jana, 21:40', current: false },
+          { id: 'dev-1', name: 'Simu Yako (Android)', type: 'Mobile App', lastActive: 'Sasa Hivi', current: true },
         ],
         settings: {
           autoPlay: true,
-          videoQuality: '4K Ultra HD',
+          videoQuality: '1080p Full HD',
           notifications: true,
           downloadWifiOnly: true,
           language: 'Swahili',
@@ -87,7 +85,7 @@ export const useAuthStore = create<AuthState>()(
             phone: '',
             name: name || email.split('@')[0],
             avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=250&auto=format&fit=crop',
-            plan: 'Free VIP',
+            plan: 'Free',
             stats: { hoursWatched: 0, moviesCompleted: 0, watchlistCount: 0 },
             watchlist: [],
             history: [],
@@ -99,6 +97,10 @@ export const useAuthStore = create<AuthState>()(
       updateProfile: (data) =>
         set((state) => ({
           user: state.user ? { ...state.user, ...data } : null
+        })),
+      upgradePlan: (plan) =>
+        set((state) => ({
+          user: state.user ? { ...state.user, plan } : null
         })),
       toggleSetting: (key) =>
         set((state) => {
