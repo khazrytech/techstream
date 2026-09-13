@@ -7,7 +7,6 @@ const cleanChannelName = (name: string) => {
   return name.replace(/\s*[\[\(].*?[\]\)]/g, '').trim();
 };
 
-// Kanuni ya kugawa chaneli kwenye makundi ya 10
 const chunkArray = (arr: any[], size: number) => {
   const result = [];
   for (let i = 0; i < arr.length; i += size) {
@@ -24,8 +23,10 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeChannel, setActiveChannel] = useState<Channel | null>(null);
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [activeChunk, setActiveChunk] = useState(0);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const fetchChannels = async () => {
@@ -97,6 +98,24 @@ export default function Home() {
     };
   }, [activeChannel]);
 
+  const handleCategoryClick = (cat: string, e: React.MouseEvent<HTMLButtonElement>) => {
+    setSelectedCategory(cat);
+    setActiveChunk(0); // Reset ukurasa unaporudisha kategoria mpya
+    // Hii inasogeza kitufe kilichobonyezwa kikae katikati ya kioo (auto-center)
+    e.currentTarget.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+    
+    // Rudisha scroll ya channels mwanzo
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollLeft, clientWidth } = e.currentTarget;
+    const activeIndex = Math.round(scrollLeft / clientWidth);
+    setActiveChunk(activeIndex);
+  };
+
   const filteredChannels = channels.filter(c => {
     const matchesCategory = selectedCategory === "All" ? true : selectedCategory === "Favorites" ? favorites.includes(c.id) : c.group === selectedCategory;
     const cleanName = cleanChannelName(c.name).toLowerCase();
@@ -105,8 +124,6 @@ export default function Home() {
   });
 
   const heroChannels = channels.slice(0, 10);
-  
-  // Hapa tunagawa chaneli zilizochujwa kwenye bloku za 10-10
   const chunkedChannels = chunkArray(filteredChannels, 10);
 
   if (loading) {
@@ -186,7 +203,7 @@ export default function Home() {
               </span>
             </div>
 
-            <div className="flex space-x-3.5 overflow-x-auto pb-2 scrollbar-none snap-x">
+            <div className="flex space-x-3.5 overflow-x-auto pb-2 scrollbar-none snap-x scroll-smooth">
               {heroChannels.map((ch) => (
                 <div
                   key={ch.id}
@@ -208,10 +225,10 @@ export default function Home() {
         )}
 
         <section className="px-3 sm:px-4">
-          <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-none">
+          <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-none scroll-smooth snap-x">
             <button
-              onClick={() => setSelectedCategory("Favorites")}
-              className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all shadow-md ${
+              onClick={(e) => handleCategoryClick("Favorites", e)}
+              className={`snap-center px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all shadow-md flex-shrink-0 ${
                 selectedCategory === "Favorites" ? 'bg-red-600 text-white' : 'bg-neutral-900 text-neutral-300 border border-neutral-800'
               }`}
             >
@@ -220,8 +237,8 @@ export default function Home() {
             {categories.map((cat) => (
               <button
                 key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all shadow-md ${
+                onClick={(e) => handleCategoryClick(cat, e)}
+                className={`snap-center px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all shadow-md flex-shrink-0 ${
                   selectedCategory === cat ? 'bg-red-600 text-white' : 'bg-neutral-900 text-neutral-400 border border-neutral-800'
                 }`}
               >
@@ -231,44 +248,66 @@ export default function Home() {
           </div>
         </section>
 
-        {/* BLOKU KUU YENYE PAGES ZA KUSLIDE ZENYE CHANELI 10 KILA MOJA */}
-        <section className="pb-4 w-full">
-          <div className="flex w-full overflow-x-auto snap-x snap-mandatory scrollbar-none pb-2">
+        <section className="pb-6 w-full">
+          <div 
+            ref={scrollContainerRef}
+            onScroll={handleScroll}
+            className="flex w-full overflow-x-auto snap-x snap-mandatory scrollbar-none pb-2 scroll-smooth"
+          >
             {chunkedChannels.length === 0 ? (
               <div className="min-w-full py-12 text-center text-neutral-500 text-xs px-4">
-                Hakuna chaneli iliyopatikana.
+                No channels found in this category.
               </div>
             ) : (
               chunkedChannels.map((chunk, idx) => (
                 <div key={idx} className="min-w-full flex-shrink-0 snap-center grid grid-cols-2 gap-2.5 px-3 sm:px-4">
-                  {chunk.map((channel) => (
-                    <div 
-                      key={channel.id}
-                      onClick={() => setActiveChannel(channel)}
-                      className="bg-neutral-900/80 border border-neutral-800/80 rounded-xl p-2 flex items-center justify-between hover:border-red-600/70 cursor-pointer shadow-lg relative group h-[52px]"
-                    >
-                      <div className="flex items-center space-x-2.5 overflow-hidden w-full pr-6">
-                        <div className="w-9 h-9 bg-neutral-800/90 rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
-                          {channel.logo ? <img src={channel.logo} className="w-full h-full object-contain" /> : <span className="text-xs">📺</span>}
+                  {chunk.map((channel) => {
+                    const isPlaying = activeChannel?.id === channel.id;
+                    return (
+                      <div 
+                        key={channel.id}
+                        onClick={() => setActiveChannel(channel)}
+                        className={`border rounded-xl p-2 flex items-center justify-between cursor-pointer shadow-lg relative group h-[52px] transition-all ${
+                          isPlaying ? 'bg-red-950/30 border-red-600/70 ring-1 ring-red-600/30' : 'bg-neutral-900/80 border-neutral-800/80 hover:border-neutral-600'
+                        }`}
+                      >
+                        <div className="flex items-center space-x-2.5 overflow-hidden w-full pr-6">
+                          <div className="w-9 h-9 bg-neutral-800/90 rounded-lg flex items-center justify-center shrink-0 overflow-hidden relative">
+                            {channel.logo ? <img src={channel.logo} className="w-full h-full object-contain" /> : <span className="text-xs">📺</span>}
+                            {isPlaying && <div className="absolute inset-0 bg-red-600/20 animate-pulse border border-red-500/50 rounded-lg"></div>}
+                          </div>
+                          <div className="overflow-hidden">
+                            <h4 className={`font-bold text-[11px] truncate w-[100px] ${isPlaying ? 'text-red-400' : 'text-white group-hover:text-neutral-200'}`}>
+                              {cleanChannelName(channel.name)}
+                            </h4>
+                            <span className="text-[9px] text-neutral-400 truncate block mt-0.5">{channel.group}</span>
+                          </div>
                         </div>
-                        <div className="overflow-hidden">
-                          <h4 className="font-bold text-[11px] text-white group-hover:text-red-400 truncate w-[100px]">{cleanChannelName(channel.name)}</h4>
-                          <span className="text-[9px] text-neutral-400 truncate block mt-0.5">{channel.group}</span>
-                        </div>
+                        <button onClick={(e) => toggleFavorite(channel.id, e)} className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] p-2 shrink-0 z-10 hover:scale-110 transition-transform">
+                          {favorites.includes(channel.id) ? '❤️' : '🤍'}
+                        </button>
                       </div>
-                      <button onClick={(e) => toggleFavorite(channel.id, e)} className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] p-2 shrink-0 z-10">
-                        {favorites.includes(channel.id) ? '❤️' : '🤍'}
-                      </button>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ))
             )}
           </div>
+          
           {chunkedChannels.length > 1 && (
-            <div className="flex justify-center mt-2">
-              <span className="text-[9px] text-neutral-500 font-bold uppercase tracking-widest animate-pulse">
-                &larr; Telezesha Kuona Zaidi &rarr;
+            <div className="flex flex-col items-center mt-3 space-y-2">
+              <div className="flex space-x-1.5">
+                {chunkedChannels.map((_, i) => (
+                  <div 
+                    key={i} 
+                    className={`h-1.5 rounded-full transition-all duration-300 ${activeChunk === i ? 'w-4 bg-red-600' : 'w-1.5 bg-neutral-700'}`}
+                  />
+                ))}
+              </div>
+              <span className="text-[9px] text-neutral-500 font-bold uppercase tracking-widest flex items-center space-x-1">
+                <span className="animate-pulse">&larr;</span> 
+                <span>SWIPE TO EXPLORE</span> 
+                <span className="animate-pulse">&rarr;</span>
               </span>
             </div>
           )}
