@@ -7,6 +7,15 @@ const cleanChannelName = (name: string) => {
   return name.replace(/\s*[\[\(].*?[\]\)]/g, '').trim();
 };
 
+// Kanuni ya kugawa chaneli kwenye makundi ya 10
+const chunkArray = (arr: any[], size: number) => {
+  const result = [];
+  for (let i = 0; i < arr.length; i += size) {
+    result.push(arr.slice(i, i + size));
+  }
+  return result;
+};
+
 export default function Home() {
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<string[]>(["All"]);
@@ -96,6 +105,9 @@ export default function Home() {
   });
 
   const heroChannels = channels.slice(0, 10);
+  
+  // Hapa tunagawa chaneli zilizochujwa kwenye bloku za 10-10
+  const chunkedChannels = chunkArray(filteredChannels, 10);
 
   if (loading) {
     return (
@@ -111,7 +123,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white pb-32 font-sans select-none antialiased">
+    <div className="min-h-screen bg-[#050505] text-white pb-32 font-sans select-none antialiased overflow-hidden">
       <header className="flex items-center justify-between px-4 py-3.5 bg-[#050505]/95 backdrop-blur-xl sticky top-0 z-40 border-b border-neutral-800/80 shadow-xl">
         <div className="flex items-center space-x-2.5">
           <div className="w-9 h-9 bg-gradient-to-tr from-red-700 to-red-500 rounded-xl flex items-center justify-center shadow-lg shadow-red-600/40">
@@ -126,7 +138,7 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="space-y-5 pt-3">
+      <main className="space-y-4 pt-3 w-full overflow-hidden">
         {activeChannel && (
           <section className="px-3 sm:px-4">
             <div className="w-full bg-black border border-neutral-800/80 rounded-2xl overflow-hidden shadow-2xl relative">
@@ -167,14 +179,14 @@ export default function Home() {
 
         {!searchQuery && heroChannels.length > 0 && (
           <section className="px-3 sm:px-4">
-            <div className="flex items-center justify-between mb-2.5">
+            <div className="flex items-center justify-between mb-2">
               <span className="text-[11px] font-extrabold uppercase tracking-wider text-red-500 bg-red-500/10 px-3 py-1 rounded-lg border border-red-500/20 flex items-center space-x-1.5">
                 <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
                 <span>Live Sasa</span>
               </span>
             </div>
 
-            <div className="flex space-x-3.5 overflow-x-auto pb-3 scrollbar-none snap-x">
+            <div className="flex space-x-3.5 overflow-x-auto pb-2 scrollbar-none snap-x">
               {heroChannels.map((ch) => (
                 <div
                   key={ch.id}
@@ -219,34 +231,47 @@ export default function Home() {
           </div>
         </section>
 
-        {/* LIST YENYE MFUMO WA GRID KUWEZESHA KUONA CHANELI NYINGI */}
-        <section className="px-3 sm:px-4 pb-4">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
-            {filteredChannels.length === 0 ? (
-              <div className="col-span-full py-12 text-center text-neutral-500 text-xs">
+        {/* BLOKU KUU YENYE PAGES ZA KUSLIDE ZENYE CHANELI 10 KILA MOJA */}
+        <section className="pb-4 w-full">
+          <div className="flex w-full overflow-x-auto snap-x snap-mandatory scrollbar-none pb-2">
+            {chunkedChannels.length === 0 ? (
+              <div className="min-w-full py-12 text-center text-neutral-500 text-xs px-4">
                 Hakuna chaneli iliyopatikana.
               </div>
             ) : (
-              filteredChannels.map((channel) => (
-                <div 
-                  key={channel.id}
-                  onClick={() => setActiveChannel(channel)}
-                  className="bg-neutral-900/80 border border-neutral-800/80 rounded-xl p-2.5 flex flex-col hover:border-red-600/70 cursor-pointer group shadow-lg relative"
-                >
-                  <button onClick={(e) => toggleFavorite(channel.id, e)} className="absolute top-2 right-2 text-xs z-10 bg-black/40 rounded-full p-1">
-                    {favorites.includes(channel.id) ? '❤️' : '🤍'}
-                  </button>
-                  <div className="w-12 h-12 bg-neutral-800/90 rounded-lg flex items-center justify-center overflow-hidden mb-2 mx-auto">
-                    {channel.logo ? <img src={channel.logo} className="w-full h-full object-contain" /> : "📺"}
-                  </div>
-                  <div className="text-center overflow-hidden">
-                    <h4 className="font-bold text-[11px] text-white group-hover:text-red-400 truncate">{cleanChannelName(channel.name)}</h4>
-                    <span className="text-[9px] text-neutral-400 truncate block mt-0.5">{channel.group}</span>
-                  </div>
+              chunkedChannels.map((chunk, idx) => (
+                <div key={idx} className="min-w-full flex-shrink-0 snap-center grid grid-cols-2 gap-2.5 px-3 sm:px-4">
+                  {chunk.map((channel) => (
+                    <div 
+                      key={channel.id}
+                      onClick={() => setActiveChannel(channel)}
+                      className="bg-neutral-900/80 border border-neutral-800/80 rounded-xl p-2 flex items-center justify-between hover:border-red-600/70 cursor-pointer shadow-lg relative group h-[52px]"
+                    >
+                      <div className="flex items-center space-x-2.5 overflow-hidden w-full pr-6">
+                        <div className="w-9 h-9 bg-neutral-800/90 rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
+                          {channel.logo ? <img src={channel.logo} className="w-full h-full object-contain" /> : <span className="text-xs">📺</span>}
+                        </div>
+                        <div className="overflow-hidden">
+                          <h4 className="font-bold text-[11px] text-white group-hover:text-red-400 truncate w-[100px]">{cleanChannelName(channel.name)}</h4>
+                          <span className="text-[9px] text-neutral-400 truncate block mt-0.5">{channel.group}</span>
+                        </div>
+                      </div>
+                      <button onClick={(e) => toggleFavorite(channel.id, e)} className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] p-2 shrink-0 z-10">
+                        {favorites.includes(channel.id) ? '❤️' : '🤍'}
+                      </button>
+                    </div>
+                  ))}
                 </div>
               ))
             )}
           </div>
+          {chunkedChannels.length > 1 && (
+            <div className="flex justify-center mt-2">
+              <span className="text-[9px] text-neutral-500 font-bold uppercase tracking-widest animate-pulse">
+                &larr; Telezesha Kuona Zaidi &rarr;
+              </span>
+            </div>
+          )}
         </section>
       </main>
     </div>

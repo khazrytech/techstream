@@ -11,14 +11,14 @@ export function BottomNav() {
     { name: "Mwanzo", path: "/", icon: Home },
     { name: "Movies", path: "/movies", icon: Film },
     { name: "Series", path: "/series", icon: Tv },
-    { name: "Live TV", path: "/iptv", icon: Radio },
+    { name: "Live TV", path: "#", icon: Radio }, // Link imetolewa, imebaki tupu (#)
     { name: "Profile", path: "/profile", icon: User },
   ];
 
   return (
     <div className="fixed bottom-3 left-3 right-3 max-w-md mx-auto bg-neutral-900/95 backdrop-blur-2xl border border-neutral-800/90 px-3 py-2.5 flex justify-around items-center z-[9999] rounded-2xl shadow-2xl pointer-events-auto">
       {navItems.map((item) => {
-        const isActive = pathname === item.path;
+        const isActive = pathname === item.path && item.path !== "#";
         const Icon = item.icon;
         return (
           <Link
