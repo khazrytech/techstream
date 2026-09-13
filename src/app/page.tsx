@@ -1,5 +1,6 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import Hls from "hls.js";
 
 interface Channel {
   id: string;
@@ -19,6 +20,8 @@ export default function Home() {
   const [activeChannel, setActiveChannel] = useState<Channel | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoadingPlaylist, setIsLoadingPlaylist] = useState(false);
+  
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   const parseM3U = (m3uText: string) => {
     const lines = m3uText.split("\n");
@@ -74,6 +77,36 @@ export default function Home() {
     loadPlaylist(m3uUrl);
   }, []);
 
+  // HLS Player Management Effect
+  useEffect(() => {
+    if (!activeChannel || !isPlaying) return;
+    const video = videoRef.current;
+    if (!video) return;
+
+    let hls: Hls | null = null;
+
+    if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = activeChannel.url;
+      video.play().catch(() => {});
+    } else if (Hls.isSupported()) {
+      hls = new Hls({
+        maxBufferLength: 30,
+        liveSyncDurationCount: 3,
+      });
+      hls.loadSource(activeChannel.url);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        video.play().catch(() => {});
+      });
+    }
+
+    return () => {
+      if (hls) {
+        hls.destroy();
+      }
+    };
+  }, [activeChannel, isPlaying]);
+
   const filteredChannels = selectedCategory === "All" 
     ? channels 
     : channels.filter(c => c.category === selectedCategory);
@@ -121,6 +154,48 @@ export default function Home() {
       {/* Main Content Area */}
       {activeTab === "mwanzo" && (
         <main className="space-y-4 pt-3">
+          {/* Active Stream Player View with Direct HLS Playback */}
+          {activeChannel && (
+            <section className="px-4">
+              <div className="w-full bg-neutral-900 border border-neutral-800 rounded-2xl overflow-hidden shadow-2xl">
+                <div className="relative aspect-video bg-neutral-950 flex items-center justify-center">
+                  {isPlaying ? (
+                    <div className="absolute inset-0 bg-black flex flex-col items-center justify-center">
+                      <video 
+                        ref={videoRef}
+                        controls 
+                        autoPlay 
+                        playsInline
+                        className="w-full h-full object-contain bg-black"
+                      />
+                      <button 
+                        onClick={() => setIsPlaying(false)}
+                        className="absolute top-2 right-2 bg-black/70 hover:bg-red-600 text-white text-[10px] px-2.5 py-1 rounded-full backdrop-blur-md z-10 transition-colors"
+                      >
+                        Ficha Player ✕
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col items-center justify-center p-4 text-center">
+                      <div className="w-12 h-12 bg-neutral-800 rounded-xl flex items-center justify-center text-xl mb-2 overflow-hidden">
+                        {activeChannel.logo.startsWith("http") ? <img src={activeChannel.logo} className="w-full h-full object-contain" /> : activeChannel.logo}
+                      </div>
+                      <h2 className="text-base font-bold text-white mb-1">{activeChannel.name}</h2>
+                      <p className="text-xs text-neutral-400 mb-3">Kundi: {activeChannel.category}</p>
+                      <button 
+                        onClick={() => setIsPlaying(true)}
+                        className="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-xl text-xs font-bold flex items-center space-x-2 shadow-lg shadow-red-600/40 transition-transform active:scale-95"
+                      >
+                        <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        <span>Anzisha Stream Sasa</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </section>
+          )}
+
           {/* Hero Slider Section for IPTV Channels */}
           <section className="px-4">
             <div className="flex items-center justify-between mb-2">
@@ -161,51 +236,6 @@ export default function Home() {
               ))}
             </div>
           </section>
-
-          {/* Active Stream Player View */}
-          {activeChannel && (
-            <section className="px-4">
-              <div className="w-full bg-neutral-900 border border-neutral-800 rounded-2xl overflow-hidden shadow-2xl">
-                <div className="relative aspect-video bg-neutral-950 flex items-center justify-center">
-                  {isPlaying ? (
-                    <div className="absolute inset-0 bg-black flex flex-col items-center justify-center p-4">
-                      <div className="text-4xl mb-2">{activeChannel.logo.startsWith("http") ? <img src={activeChannel.logo} className="w-12 h-12 object-contain" /> : activeChannel.logo}</div>
-                      <p className="text-sm font-bold text-white text-center">{activeChannel.name}</p>
-                      <p className="text-[10px] text-red-500 mt-1 truncate max-w-xs">{activeChannel.url}</p>
-                      <div className="flex space-x-2 mt-4">
-                        <a 
-                          href={activeChannel.url} 
-                          target="_blank" 
-                          rel="noreferrer"
-                          className="bg-red-600 text-white text-xs px-4 py-2 rounded-xl font-bold shadow-lg shadow-red-600/30"
-                        >
-                          Fungua Player ↗
-                        </a>
-                        <button 
-                          onClick={() => setIsPlaying(false)}
-                          className="bg-neutral-800 hover:bg-neutral-700 text-xs px-4 py-2 rounded-xl text-neutral-300 font-semibold"
-                        >
-                          Ficha
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col items-center justify-center p-4 text-center">
-                      <h2 className="text-base font-bold text-white mb-1">{activeChannel.name}</h2>
-                      <p className="text-xs text-neutral-400 mb-3">Kundi: {activeChannel.category}</p>
-                      <button 
-                        onClick={() => setIsPlaying(true)}
-                        className="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-xl text-xs font-bold flex items-center space-x-2 shadow-lg shadow-red-600/40 transition-transform active:scale-95"
-                      >
-                        <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                        <span>Anzisha Stream Sasa</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </section>
-          )}
 
           {/* Category Filter Pills */}
           <section className="px-4">
