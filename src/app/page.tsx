@@ -3,6 +3,11 @@ import { useState, useEffect, useRef } from "react";
 import Hls from "hls.js";
 import { Channel, CategoryGroup } from "@/lib/iptv-parser";
 
+// Function ya kusafisha majina (Kutoa (360p), [Not 24/7] n.k)
+const cleanChannelName = (name: string) => {
+  return name.replace(/\s*[\[\(].*?[\]\)]/g, '').trim();
+};
+
 export default function Home() {
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<string[]>(["All"]);
@@ -10,7 +15,6 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [activeChannel, setActiveChannel] = useState<Channel | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -33,6 +37,7 @@ export default function Home() {
           setCategories(cats);
           setChannels(allChans);
           
+          // Set chaneli ya kwanza na ianze ku-play moja kwa moja
           if (allChans.length > 0) {
             setActiveChannel(allChans[0]);
           }
@@ -62,7 +67,7 @@ export default function Home() {
   };
 
   useEffect(() => {
-    if (!activeChannel || !isPlaying) return;
+    if (!activeChannel) return;
     const video = videoRef.current;
     if (!video) return;
 
@@ -83,11 +88,12 @@ export default function Home() {
     return () => {
       if (hls) hls.destroy();
     };
-  }, [activeChannel, isPlaying]);
+  }, [activeChannel]);
 
   const filteredChannels = channels.filter(c => {
     const matchesCategory = selectedCategory === "All" ? true : selectedCategory === "Favorites" ? favorites.includes(c.id) : c.group === selectedCategory;
-    const matchesSearch = c.name.toLowerCase().includes(searchQuery.toLowerCase()) || (c.group && c.group.toLowerCase().includes(searchQuery.toLowerCase()));
+    const cleanName = cleanChannelName(c.name).toLowerCase();
+    const matchesSearch = cleanName.includes(searchQuery.toLowerCase()) || (c.group && c.group.toLowerCase().includes(searchQuery.toLowerCase()));
     return matchesCategory && matchesSearch;
   });
 
@@ -101,7 +107,7 @@ export default function Home() {
           <div className="absolute inset-0 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
           <div className="w-6 h-6 bg-red-600 rounded-full animate-pulse"></div>
         </div>
-        <p className="text-red-500 font-extrabold text-xs animate-pulse tracking-widest uppercase">Inapakia Chaneli...</p>
+        <p className="text-red-500 font-extrabold text-xs animate-pulse tracking-widest uppercase">LOADING...</p>
       </div>
     );
   }
@@ -130,48 +136,22 @@ export default function Home() {
       </header>
 
       <main className="space-y-5 pt-3">
+        {/* PLAYER YA MOJA KWA MOJA (AUTO-PLAY) */}
         {activeChannel && (
           <section className="px-3 sm:px-4">
-            <div className="w-full bg-neutral-900 border border-neutral-800/80 rounded-2xl overflow-hidden shadow-2xl relative group">
-              <div className="relative aspect-video bg-black flex items-center justify-center">
-                {isPlaying ? (
-                  <div className="absolute inset-0 bg-black flex flex-col items-center justify-center">
-                    <video 
-                      ref={videoRef}
-                      controls 
-                      autoPlay 
-                      playsInline
-                      className="w-full h-full object-contain bg-black"
-                    />
-                    <div className="absolute top-3 left-3 flex items-center space-x-2 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 z-10">
-                      <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
-                      <span className="text-[10px] font-bold text-white truncate max-w-[150px]">{activeChannel.name}</span>
-                    </div>
-                    <button 
-                      onClick={() => setIsPlaying(false)}
-                      className="absolute top-3 right-3 bg-neutral-900/80 hover:bg-red-600 text-white text-[11px] px-3 py-1 rounded-full backdrop-blur-md z-10 transition-all font-bold border border-neutral-700"
-                    >
-                      Ficha Player ✕
-                    </button>
-                  </div>
-                ) : (
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent flex flex-col items-center justify-center p-6 text-center">
-                    <div className="w-14 h-14 bg-neutral-800 border border-neutral-700 rounded-2xl flex items-center justify-center text-2xl mb-3 shadow-lg overflow-hidden">
-                      {activeChannel.logo ? (
-                        <img src={activeChannel.logo} className="w-full h-full object-contain" onError={(e)=>{(e.target as HTMLElement).style.display='none';}} />
-                      ) : "📺"}
-                    </div>
-                    <h2 className="text-base font-extrabold text-white mb-1">{activeChannel.name}</h2>
-                    <p className="text-xs text-neutral-400 mb-4 bg-neutral-800/60 px-3 py-1 rounded-full border border-neutral-700/50">Kundi: {activeChannel.group}</p>
-                    <button 
-                      onClick={() => setIsPlaying(true)}
-                      className="bg-red-600 hover:bg-red-700 active:scale-95 text-white px-6 py-2.5 rounded-xl text-xs font-bold flex items-center space-x-2 shadow-xl shadow-red-600/40 transition-all"
-                    >
-                      <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                      <span>Anzisha Stream Sasa</span>
-                    </button>
-                  </div>
-                )}
+            <div className="w-full bg-black border border-neutral-800/80 rounded-2xl overflow-hidden shadow-2xl relative">
+              <div className="relative aspect-video flex items-center justify-center">
+                <video 
+                  ref={videoRef}
+                  controls 
+                  autoPlay 
+                  playsInline
+                  className="w-full h-full object-contain bg-black"
+                />
+                <div className="absolute top-3 left-3 flex items-center space-x-2 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 z-10 pointer-events-none">
+                  <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+                  <span className="text-[10px] font-bold text-white truncate max-w-[150px]">{cleanChannelName(activeChannel.name)}</span>
+                </div>
               </div>
             </div>
           </section>
@@ -208,7 +188,7 @@ export default function Home() {
               {heroChannels.map((ch) => (
                 <div
                   key={ch.id}
-                  onClick={() => { setActiveChannel(ch); setIsPlaying(true); }}
+                  onClick={() => setActiveChannel(ch)}
                   className={`min-w-[240px] max-w-[240px] snap-center rounded-2xl p-4 bg-gradient-to-br from-neutral-900 to-neutral-950 border transition-all cursor-pointer relative shadow-xl ${
                     activeChannel?.id === ch.id ? 'border-red-600 ring-1 ring-red-600/50' : 'border-neutral-800/80'
                   }`}
@@ -217,7 +197,7 @@ export default function Home() {
                   <div className="w-12 h-12 bg-neutral-800/80 rounded-xl flex items-center justify-center text-2xl mb-3 overflow-hidden">
                     {ch.logo ? <img src={ch.logo} className="w-full h-full object-contain" /> : "📺"}
                   </div>
-                  <h3 className="font-extrabold text-sm text-white truncate">{ch.name}</h3>
+                  <h3 className="font-extrabold text-sm text-white truncate">{cleanChannelName(ch.name)}</h3>
                   <p className="text-[11px] text-neutral-400 mt-0.5 truncate">{ch.group}</p>
                 </div>
               ))}
@@ -249,29 +229,30 @@ export default function Home() {
           </div>
         </section>
 
+        {/* LIST YA CHINI ILIYOBADILISHWA KUWA HORIZONTAL SCROLL */}
         <section className="px-3 sm:px-4 pb-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div className="flex space-x-3 overflow-x-auto pb-4 scrollbar-none snap-x">
             {filteredChannels.length === 0 ? (
-              <div className="col-span-full py-12 text-center text-neutral-500 text-xs">
+              <div className="w-full py-12 text-center text-neutral-500 text-xs">
                 Hakuna chaneli iliyopatikana.
               </div>
             ) : (
               filteredChannels.map((channel) => (
                 <div 
                   key={channel.id}
-                  onClick={() => { setActiveChannel(channel); setIsPlaying(true); }}
-                  className="bg-neutral-900/80 border border-neutral-800/80 rounded-xl p-3 flex items-center justify-between hover:border-red-600/70 cursor-pointer group"
+                  onClick={() => setActiveChannel(channel)}
+                  className="min-w-[220px] max-w-[220px] snap-start bg-neutral-900/80 border border-neutral-800/80 rounded-xl p-3 flex items-center justify-between hover:border-red-600/70 cursor-pointer group shadow-lg"
                 >
-                  <div className="flex items-center space-x-3.5">
-                    <div className="w-10 h-10 bg-neutral-800/90 rounded-lg flex items-center justify-center overflow-hidden">
+                  <div className="flex items-center space-x-3 overflow-hidden">
+                    <div className="w-10 h-10 bg-neutral-800/90 rounded-lg flex items-center justify-center overflow-hidden shrink-0">
                       {channel.logo ? <img src={channel.logo} className="w-full h-full object-contain" /> : "📺"}
                     </div>
-                    <div>
-                      <h4 className="font-bold text-sm text-white group-hover:text-red-400 truncate max-w-[150px]">{channel.name}</h4>
-                      <span className="text-[9px] text-neutral-400">{channel.group}</span>
+                    <div className="overflow-hidden">
+                      <h4 className="font-bold text-sm text-white group-hover:text-red-400 truncate w-[115px]">{cleanChannelName(channel.name)}</h4>
+                      <span className="text-[9px] text-neutral-400 truncate block">{channel.group}</span>
                     </div>
                   </div>
-                  <button onClick={(e) => toggleFavorite(channel.id, e)} className="p-2 text-sm">
+                  <button onClick={(e) => toggleFavorite(channel.id, e)} className="p-2 text-sm shrink-0">
                     {favorites.includes(channel.id) ? '❤️' : '🤍'}
                   </button>
                 </div>
