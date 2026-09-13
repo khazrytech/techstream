@@ -20,7 +20,6 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeChannel, setActiveChannel] = useState<Channel | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isLoadingPlaylist, setIsLoadingPlaylist] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -56,21 +55,44 @@ export default function Home() {
   };
 
   const loadPlaylist = async (urlToFetch: string) => {
-    setIsLoadingPlaylist(true);
     try {
       const res = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(urlToFetch)}`);
       const text = await res.text();
-      const parsed = parseM3U(text);
-      if (parsed.length > 0) {
-        setChannels(parsed);
-        const cats = ["All", ...Array.from(new Set(parsed.map(c => c.category)))];
-        setCategories(cats);
-        if (!activeChannel) setActiveChannel(parsed[0]);
+
+      if (!text.includes("#EXTINF")) {
+        const lines = text.split("\n").map(l => l.trim()).filter(l => l && !l.startsWith("#"));
+        const tzPlaylist = lines.find(l => l.includes("tza.m3u") || l.includes("tz.m3u")) || lines[0];
+        const popularPlaylists = [tzPlaylist, ...lines.slice(0, 4)].filter(Boolean);
+
+        let allParsed: Channel[] = [];
+        for (const subUrl of popularPlaylists) {
+          try {
+            const subRes = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(subUrl)}`);
+            const subText = await subRes.text();
+            const parsed = parseM3U(subText);
+            allParsed = [...allParsed, ...parsed];
+          } catch (err) {
+            console.error("Error sub-playlist", subUrl);
+          }
+        }
+        if (allParsed.length > 0) {
+          setChannels(allParsed);
+          const cats = ["All", ...Array.from(new Set(allParsed.map(c => c.category)))];
+          setCategories(cats);
+          if (!activeChannel) setActiveChannel(allParsed[0]);
+        }
+      } else {
+        const parsed = parseM3U(text);
+        if (parsed.length > 0) {
+          setChannels(parsed);
+          const cats = ["All", ...Array.from(new Set(parsed.map(c => c.category)))];
+          setCategories(cats);
+          if (!activeChannel) setActiveChannel(parsed[0]);
+        }
       }
     } catch (e) {
       console.error("Error fetching playlist:", e);
     } finally {
-      setIsLoadingPlaylist(false);
       setLoading(false);
     }
   };
@@ -93,7 +115,6 @@ export default function Home() {
     localStorage.setItem("techstream_favs", JSON.stringify(updated));
   };
 
-  // HLS Player Management
   useEffect(() => {
     if (!activeChannel || !isPlaying) return;
     const video = videoRef.current;
@@ -128,24 +149,15 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center text-white px-6">
-        <div className="relative w-20 h-20 mb-6">
-          <div className="absolute inset-0 rounded-full border-4 border-red-600/20"></div>
-          <div className="absolute inset-0 rounded-full border-4 border-red-600 border-t-transparent animate-spin"></div>
-          <div className="absolute inset-0 flex items-center justify-center text-xl font-black text-red-500">▶</div>
-        </div>
-        <div className="text-center space-y-1.5">
-          <h2 className="text-sm font-extrabold tracking-wider uppercase text-white">TechStream Pro V2</h2>
-          <p className="text-[11px] font-medium text-neutral-400 animate-pulse">Inapakia chaneli za IPTV kwa ufasaha...</p>
-        </div>
+      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+        <div className="w-12 h-12 rounded-full border-4 border-red-600 border-t-transparent animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white pb-32 font-sans select-none antialiased">
-      {/* Top Navigation Header (Clean, No Input Field) */}
-      <header className="flex items-center justify-between px-4 py-3.5 bg-[#050505]/95 backdrop-blur-xl sticky top-0 z-50 border-b border-neutral-800/80 shadow-xl">
+    <div className="min-h-screen bg-[#050505] text-white pb-28 font-sans select-none antialiased">
+      <header className="flex items-center justify-between px-4 py-3.5 bg-[#050505]/95 backdrop-blur-xl sticky top-0 z-40 border-b border-neutral-800/80 shadow-xl">
         <div className="flex items-center space-x-2.5">
           <div className="w-9 h-9 bg-gradient-to-tr from-red-700 to-red-500 rounded-xl flex items-center justify-center shadow-lg shadow-red-600/40">
             <span className="text-white font-black text-lg">▶</span>
@@ -166,10 +178,8 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Main Tab Content */}
       {activeTab === "mwanzo" && (
         <main className="space-y-5 pt-3">
-          {/* Active Stream Player View */}
           {activeChannel && (
             <section className="px-3 sm:px-4">
               <div className="w-full bg-neutral-900 border border-neutral-800/80 rounded-2xl overflow-hidden shadow-2xl relative group">
@@ -217,7 +227,6 @@ export default function Home() {
             </section>
           )}
 
-          {/* Search Bar Section */}
           <section className="px-3 sm:px-4">
             <div className="relative">
               <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-neutral-400">🔍</span>
@@ -236,7 +245,6 @@ export default function Home() {
             </div>
           </section>
 
-          {/* Hero Slider / Featured Channels */}
           {!searchQuery && heroChannels.length > 0 && (
             <section className="px-3 sm:px-4">
               <div className="flex items-center justify-between mb-2.5">
@@ -279,7 +287,6 @@ export default function Home() {
             </section>
           )}
 
-          {/* Category Filter Pills */}
           <section className="px-3 sm:px-4">
             <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-wider mb-2.5">Makundi ya Chaneli</h3>
             <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-none">
@@ -307,7 +314,6 @@ export default function Home() {
             </div>
           </section>
 
-          {/* Filtered Channel List */}
           <section className="px-3 sm:px-4 pb-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               {filteredChannels.length === 0 ? (
@@ -402,7 +408,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* Single Clean Fixed Bottom Navigation Bar (No Duplication) */}
       <nav className="fixed bottom-3 left-3 right-3 max-w-md mx-auto bg-neutral-900/95 backdrop-blur-2xl border border-neutral-800/90 px-4 py-2.5 flex justify-around items-center z-50 rounded-2xl shadow-2xl">
         <button
           onClick={() => setActiveTab("mwanzo")}
