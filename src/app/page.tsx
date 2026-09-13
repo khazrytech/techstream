@@ -13,7 +13,7 @@ interface Channel {
 export default function Home() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("mwanzo");
-  const [m3uUrl, setM3uUrl] = useState("https://raw.githubusercontent.com/Free-TV/IPTV/master/playlist.m3u8");
+  const m3uUrl = "https://iptv-org.github.io/iptv/index.m3u";
   const [channels, setChannels] = useState<Channel[]>([]);
   const [categories, setCategories] = useState<string[]>(["All"]);
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -128,17 +128,24 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center text-white">
-        <div className="w-14 h-14 border-4 border-red-600 border-t-transparent rounded-full animate-spin mb-4 shadow-xl shadow-red-600/40"></div>
-        <p className="text-xs font-bold text-neutral-400 tracking-widest uppercase animate-pulse">Inapakia TechStream Pro v2.0...</p>
+      <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center text-white px-6">
+        <div className="relative w-20 h-20 mb-6">
+          <div className="absolute inset-0 rounded-full border-4 border-red-600/20"></div>
+          <div className="absolute inset-0 rounded-full border-4 border-red-600 border-t-transparent animate-spin"></div>
+          <div className="absolute inset-0 flex items-center justify-center text-xl font-black text-red-500">▶</div>
+        </div>
+        <div className="text-center space-y-1.5">
+          <h2 className="text-sm font-extrabold tracking-wider uppercase text-white">TechStream Pro V2</h2>
+          <p className="text-[11px] font-medium text-neutral-400 animate-pulse">Inapakia chaneli za IPTV kwa ufasaha...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white pb-28 font-sans select-none antialiased">
-      {/* Top Navigation Header */}
-      <header className="flex items-center justify-between px-4 py-3 bg-[#050505]/90 backdrop-blur-xl sticky top-0 z-50 border-b border-neutral-800/60 shadow-lg">
+    <div className="min-h-screen bg-[#050505] text-white pb-32 font-sans select-none antialiased">
+      {/* Top Navigation Header (Clean, No Input Field) */}
+      <header className="flex items-center justify-between px-4 py-3.5 bg-[#050505]/95 backdrop-blur-xl sticky top-0 z-50 border-b border-neutral-800/80 shadow-xl">
         <div className="flex items-center space-x-2.5">
           <div className="w-9 h-9 bg-gradient-to-tr from-red-700 to-red-500 rounded-xl flex items-center justify-center shadow-lg shadow-red-600/40">
             <span className="text-white font-black text-lg">▶</span>
@@ -147,24 +154,15 @@ export default function Home() {
             <h1 className="text-base font-black tracking-tight bg-gradient-to-r from-white via-neutral-200 to-red-500 bg-clip-text text-transparent">
               TechStream
             </h1>
-            <p className="text-[9px] text-red-500 font-extrabold tracking-widest uppercase">PRO IPTV</p>
+            <p className="text-[9px] text-red-500 font-extrabold tracking-widest uppercase">PRO IPTV V2</p>
           </div>
         </div>
-        
+
         <div className="flex items-center space-x-2">
-          <input 
-            type="text" 
-            value={m3uUrl} 
-            onChange={(e) => setM3uUrl(e.target.value)}
-            placeholder="Weka M3U Link..."
-            className="bg-neutral-900 border border-neutral-800 text-[10px] text-neutral-200 px-3 py-1.5 rounded-full w-28 sm:w-40 focus:outline-none focus:border-red-600 transition-all shadow-inner"
-          />
-          <button 
-            onClick={() => loadPlaylist(m3uUrl)}
-            className="bg-red-600 hover:bg-red-700 active:scale-95 text-white px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shadow-md shadow-red-600/30"
-          >
-            {isLoadingPlaylist ? "..." : "Badili"}
-          </button>
+          <span className="text-[10px] bg-red-600/10 text-red-400 font-bold px-3 py-1.5 rounded-full border border-red-600/20 flex items-center space-x-1">
+            <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+            <span>{channels.length} Chaneli</span>
+          </span>
         </div>
       </header>
 
@@ -239,14 +237,14 @@ export default function Home() {
           </section>
 
           {/* Hero Slider / Featured Channels */}
-          {!searchQuery && (
+          {!searchQuery && heroChannels.length > 0 && (
             <section className="px-3 sm:px-4">
               <div className="flex items-center justify-between mb-2.5">
                 <span className="text-[11px] font-extrabold uppercase tracking-wider text-red-500 bg-red-500/10 px-3 py-1 rounded-lg border border-red-500/20 flex items-center space-x-1.5">
                   <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
                   <span>Featured Live Hero</span>
                 </span>
-                <span className="text-[11px] text-neutral-400 font-semibold">{channels.length} Total Channels</span>
+                <span className="text-[11px] text-neutral-400 font-semibold">{channels.length} Total</span>
               </div>
 
               <div className="flex space-x-3.5 overflow-x-auto pb-3 scrollbar-none snap-x">
@@ -314,7 +312,7 @@ export default function Home() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               {filteredChannels.length === 0 ? (
                 <div className="col-span-full py-12 text-center text-neutral-500 text-xs">
-                  Hakuna chaneli iliyopatikana kwenye utafutaji wako.
+                  Hakuna chaneli iliyopatikana kwenye kundi hili au utafutaji wako.
                 </div>
               ) : (
                 filteredChannels.map((channel) => (
@@ -404,8 +402,8 @@ export default function Home() {
         </div>
       )}
 
-      {/* Bottom Modern Floating Navigation Bar */}
-      <nav className="fixed bottom-3 left-3 right-3 max-w-md mx-auto bg-neutral-900/90 backdrop-blur-2xl border border-neutral-800/90 px-4 py-2.5 flex justify-around items-center z-50 rounded-2xl shadow-2xl">
+      {/* Single Clean Fixed Bottom Navigation Bar (No Duplication) */}
+      <nav className="fixed bottom-3 left-3 right-3 max-w-md mx-auto bg-neutral-900/95 backdrop-blur-2xl border border-neutral-800/90 px-4 py-2.5 flex justify-around items-center z-50 rounded-2xl shadow-2xl">
         <button
           onClick={() => setActiveTab("mwanzo")}
           className={`flex flex-col items-center space-y-1 transition-all ${
