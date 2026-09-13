@@ -16,7 +16,7 @@ export function BottomNav() {
   ];
 
   return (
-    <div className="fixed bottom-3 left-3 right-3 max-w-md mx-auto bg-neutral-900/95 backdrop-blur-2xl border border-neutral-800/90 px-3 py-2.5 flex justify-around items-center z-50 rounded-2xl shadow-2xl">
+    <div className="fixed bottom-3 left-3 right-3 max-w-md mx-auto bg-neutral-900/95 backdrop-blur-2xl border border-neutral-800/90 px-3 py-2.5 flex justify-around items-center z-[9999] rounded-2xl shadow-2xl pointer-events-auto">
       {navItems.map((item) => {
         const isActive = pathname === item.path;
         const Icon = item.icon;
@@ -24,7 +24,7 @@ export function BottomNav() {
           <Link
             key={item.name}
             href={item.path}
-            className={`flex flex-col items-center space-y-1 transition-all duration-300 px-3 py-1.5 rounded-xl ${
+            className={`flex flex-col items-center justify-center space-y-1 transition-all duration-300 w-16 h-12 rounded-xl ${
               isActive
                 ? "text-red-500 font-bold scale-105 bg-red-500/10 shadow-inner"
                 : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/50"

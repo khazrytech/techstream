@@ -3,7 +3,6 @@ import { useState, useEffect, useRef } from "react";
 import Hls from "hls.js";
 import { Channel, CategoryGroup } from "@/lib/iptv-parser";
 
-// Function ya kusafisha majina (Kutoa (360p), [Not 24/7] n.k)
 const cleanChannelName = (name: string) => {
   return name.replace(/\s*[\[\(].*?[\]\)]/g, '').trim();
 };
@@ -37,7 +36,6 @@ export default function Home() {
           setCategories(cats);
           setChannels(allChans);
           
-          // Set chaneli ya kwanza na ianze ku-play moja kwa moja
           if (allChans.length > 0) {
             setActiveChannel(allChans[0]);
           }
@@ -126,17 +124,9 @@ export default function Home() {
             <p className="text-[9px] text-red-500 font-extrabold tracking-widest uppercase">PRO IPTV V2</p>
           </div>
         </div>
-
-        <div className="flex items-center space-x-2">
-          <span className="text-[10px] bg-red-600/10 text-red-400 font-bold px-3 py-1.5 rounded-full border border-red-600/20 flex items-center space-x-1">
-            <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
-            <span>{channels.length} Chaneli</span>
-          </span>
-        </div>
       </header>
 
       <main className="space-y-5 pt-3">
-        {/* PLAYER YA MOJA KWA MOJA (AUTO-PLAY) */}
         {activeChannel && (
           <section className="px-3 sm:px-4">
             <div className="w-full bg-black border border-neutral-800/80 rounded-2xl overflow-hidden shadow-2xl relative">
@@ -229,11 +219,11 @@ export default function Home() {
           </div>
         </section>
 
-        {/* LIST YA CHINI ILIYOBADILISHWA KUWA HORIZONTAL SCROLL */}
+        {/* LIST YENYE MFUMO WA GRID KUWEZESHA KUONA CHANELI NYINGI */}
         <section className="px-3 sm:px-4 pb-4">
-          <div className="flex space-x-3 overflow-x-auto pb-4 scrollbar-none snap-x">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
             {filteredChannels.length === 0 ? (
-              <div className="w-full py-12 text-center text-neutral-500 text-xs">
+              <div className="col-span-full py-12 text-center text-neutral-500 text-xs">
                 Hakuna chaneli iliyopatikana.
               </div>
             ) : (
@@ -241,20 +231,18 @@ export default function Home() {
                 <div 
                   key={channel.id}
                   onClick={() => setActiveChannel(channel)}
-                  className="min-w-[220px] max-w-[220px] snap-start bg-neutral-900/80 border border-neutral-800/80 rounded-xl p-3 flex items-center justify-between hover:border-red-600/70 cursor-pointer group shadow-lg"
+                  className="bg-neutral-900/80 border border-neutral-800/80 rounded-xl p-2.5 flex flex-col hover:border-red-600/70 cursor-pointer group shadow-lg relative"
                 >
-                  <div className="flex items-center space-x-3 overflow-hidden">
-                    <div className="w-10 h-10 bg-neutral-800/90 rounded-lg flex items-center justify-center overflow-hidden shrink-0">
-                      {channel.logo ? <img src={channel.logo} className="w-full h-full object-contain" /> : "📺"}
-                    </div>
-                    <div className="overflow-hidden">
-                      <h4 className="font-bold text-sm text-white group-hover:text-red-400 truncate w-[115px]">{cleanChannelName(channel.name)}</h4>
-                      <span className="text-[9px] text-neutral-400 truncate block">{channel.group}</span>
-                    </div>
-                  </div>
-                  <button onClick={(e) => toggleFavorite(channel.id, e)} className="p-2 text-sm shrink-0">
+                  <button onClick={(e) => toggleFavorite(channel.id, e)} className="absolute top-2 right-2 text-xs z-10 bg-black/40 rounded-full p-1">
                     {favorites.includes(channel.id) ? '❤️' : '🤍'}
                   </button>
+                  <div className="w-12 h-12 bg-neutral-800/90 rounded-lg flex items-center justify-center overflow-hidden mb-2 mx-auto">
+                    {channel.logo ? <img src={channel.logo} className="w-full h-full object-contain" /> : "📺"}
+                  </div>
+                  <div className="text-center overflow-hidden">
+                    <h4 className="font-bold text-[11px] text-white group-hover:text-red-400 truncate">{cleanChannelName(channel.name)}</h4>
+                    <span className="text-[9px] text-neutral-400 truncate block mt-0.5">{channel.group}</span>
+                  </div>
                 </div>
               ))
             )}
