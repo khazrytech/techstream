@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Search, Heart, Lock, UserPlus } from "lucide-react";
+import { Search, Heart, Lock, UserPlus, Loader2, Play } from "lucide-react";
 import { Channel, CategoryGroup } from "@/lib/iptv-parser";
 
 interface IPTVViewProps {
@@ -33,8 +33,6 @@ export function IPTVView({ pageType = "home" }: IPTVViewProps) {
       .then((data) => {
         if (data.success && data.categories.length > 0) {
           setCategories(data.categories);
-          const firstCh = data.categories[0]?.channels[0];
-          if (firstCh) setSelectedChannel(firstCh);
         }
         setLoading(false);
       })
@@ -46,39 +44,51 @@ export function IPTVView({ pageType = "home" }: IPTVViewProps) {
 
   const allChannels = categories.flatMap((cat) => cat.channels);
 
-  // 1. KUCHUJA KIKAMILIFU KULINGANA NA UKURASA (PAGE TYPE)
+  // 1. KUCHUJA KIKAMILIFU KULINGANA NA UKURASA
   const getPageFilteredChannels = () => {
     if (pageType === "movies") {
       return allChannels.filter((c) =>
-        /movie|cinema|film|vod|action|hbo|box|thriller|comedy|horror/i.test(c.name + " " + c.group)
+        /movie|cinema|film|vod|action|hbo|box|thriller|comedy|horror|blockbuster|hollywood/i.test(
+          c.name + " " + c.group
+        ) && !/news|tbc|bbc|cnn|live|sports|habari/i.test(c.name + " " + c.group)
       );
     }
     if (pageType === "series") {
       return allChannels.filter((c) =>
-        /series|serial|drama|show|season|episode|novel/i.test(c.name + " " + c.group)
+        /series|serial|drama|show|season|episode|novel/i.test(c.name + " " + c.group) &&
+        !/news|tbc|bbc|live/i.test(c.name + " " + c.group)
       );
     }
     if (pageType === "live-tv") {
       return allChannels.filter((c) =>
-        /live|news|sport|habari|michezo|tbc|bbc|cnn|supersport|sky/i.test(c.name + " " + c.group)
+        /live|news|sport|habari|michezo|tbc|bbc|cnn|supersport|sky|tv/i.test(
+          c.name + " " + c.group
+        ) && !/vod|movie|series/i.test(c.group)
       );
     }
-    return allChannels; // Home page ina kila kitu
+    return allChannels;
   };
 
   const pageChannels = getPageFilteredChannels();
 
-  // 2. KUSAFISHA KATEGORIA BILA MCHANGANYIKO (Mfano: Kids;Sports inasafishwa)
+  // Weka chaneli ya kwanza iliyochujwa mara tu inapopakia
+  useEffect(() => {
+    if (pageChannels.length > 0 && !selectedChannel) {
+      setSelectedChannel(pageChannels[0]);
+    }
+  }, [pageChannels, selectedChannel]);
+
+  // 2. KUSAFISHA KATEGORIA
   const rawCategories = Array.from(
     new Set(
       pageChannels
-        .map((c) => c.group.split(";")[0].trim()) // Chukua tu sehemu ya kwanza
+        .map((c) => c.group.split(";")[0].trim())
         .filter((g) => g.length > 0)
     )
   );
   const cleanCategoryList = ["All", ...rawCategories];
 
-  // 3. KUCHUJA KULINGANA NA KATEGORIA NA SEARCH QUERY
+  // 3. KUCHUJA KULINGANA NA SEARCH NA KATEGORIA
   const finalFilteredChannels = pageChannels.filter((ch) => {
     const matchesSearch = ch.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory =
@@ -125,20 +135,27 @@ export function IPTVView({ pageType = "home" }: IPTVViewProps) {
       ? "📡 Live TV & News"
       : null;
 
+  // LOADING SCREEN YA KISASA (MODERN SPINNER + SKELETON)
   if (loading) {
     return (
-      <div className="min-h-screen bg-black text-zinc-400 flex items-center justify-center text-sm font-semibold">
-        Inapakia chaneli...
+      <div className="min-h-screen bg-black text-white p-4 space-y-6 flex flex-col justify-center items-center">
+        <div className="relative flex items-center justify-center">
+          <div className="w-16 h-16 border-4 border-red-600/20 border-t-red-600 rounded-full animate-spin"></div>
+          <Play className="w-6 h-6 text-red-600 absolute fill-red-600" />
+        </div>
+        <div className="text-center space-y-1">
+          <h3 className="text-sm font-bold tracking-wider text-zinc-200 uppercase">TechStream</h3>
+          <p className="text-xs text-zinc-500 animate-pulse">Inaandaa Mipangilio Ya Kisasa...</p>
+        </div>
       </div>
     );
   }
 
-  const liveHeaderChannels = pageChannels.slice(0, 6);
+  const headerItems = pageChannels.slice(0, 6);
 
   return (
     <div className="min-h-screen bg-black text-white p-4 pb-28 space-y-5">
-      
-      {/* KICHWA CHA UKURASA KAMA UKO MOVIES / SERIES / LIVE TV */}
+      {/* HEADER TITLE */}
       {pageTitle && (
         <h1 className="text-xl font-extrabold text-white tracking-wide">{pageTitle}</h1>
       )}
@@ -150,36 +167,40 @@ export function IPTVView({ pageType = "home" }: IPTVViewProps) {
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Tafuta chaneli yoyote..."
+          placeholder="Tafuta hapa..."
           className="w-full bg-zinc-900/90 border border-zinc-800/80 rounded-2xl pl-11 pr-4 py-3 text-sm text-white focus:outline-none focus:border-red-600 transition-all placeholder:text-zinc-500"
         />
       </div>
 
-      {/* LIVE SASA CAROUSEL */}
-      {liveHeaderChannels.length > 0 && (
+      {/* FEATURED / LIVE CAROUSEL */}
+      {headerItems.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center space-x-2">
             <span className="w-2.5 h-2.5 bg-red-600 rounded-full animate-pulse"></span>
             <span className="text-xs font-black tracking-wider text-red-500 uppercase">
-              LIVE SASA
+              {pageType === "movies"
+                ? "POPULAR MOVIES"
+                : pageType === "series"
+                ? "TRENDING SERIES"
+                : "LIVE SASA"}
             </span>
           </div>
 
           <div className="flex space-x-3 overflow-x-auto no-scrollbar pb-1">
-            {liveHeaderChannels.map((ch) => (
+            {headerItems.map((ch) => (
               <div
                 key={ch.id}
                 onClick={() => handleSelectChannel(ch)}
                 className="min-w-[170px] bg-zinc-900/90 border border-zinc-800/90 rounded-2xl p-3 relative flex flex-col justify-between cursor-pointer hover:border-zinc-700 transition-all"
               >
                 <span className="absolute top-2 right-2 bg-red-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded">
-                  LIVE
+                  {pageType === "movies" ? "HD" : "LIVE"}
                 </span>
                 <div className="w-10 h-10 bg-zinc-950 rounded-xl p-1 mb-2 flex items-center justify-center border border-zinc-800">
                   {ch.logo ? (
                     <img src={ch.logo} alt={ch.name} className="w-full h-full object-contain" />
                   ) : (
-                    <span className="text-[9px] text-zinc-600 font-bold">TV</span>
+                    <span className="text-[9px] text-zinc-600 font-bold">STREAM</span>
                   )}
                 </div>
                 <div>
@@ -246,10 +267,10 @@ export function IPTVView({ pageType = "home" }: IPTVViewProps) {
         ))}
       </div>
 
-      {/* GRID YA CHANELI (SAFU 2 SIFURI MCHANGANYIKO) */}
+      {/* GRID LIST */}
       {finalFilteredChannels.length === 0 ? (
         <div className="text-center py-10 text-zinc-500 text-xs font-semibold">
-          Hakuna chaneli iliyopatikana kwenye kategoria hii.
+          Hakuna maudhui yaliyopatikana.
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-3">
@@ -272,7 +293,7 @@ export function IPTVView({ pageType = "home" }: IPTVViewProps) {
                     {ch.logo ? (
                       <img src={ch.logo} alt={ch.name} className="w-full h-full object-contain" />
                     ) : (
-                      <span className="text-[9px] font-bold text-zinc-600">TV</span>
+                      <span className="text-[9px] font-bold text-zinc-600">MEDIA</span>
                     )}
                   </div>
                   <div className="overflow-hidden">
