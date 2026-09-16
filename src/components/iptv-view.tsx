@@ -8,8 +8,8 @@ interface IPTVViewProps {
   pageType?: "home" | "movies" | "series" | "live-tv";
 }
 
-// Safisha majina ya chaneli kikamilifu
 const cleanName = (name: string): string => {
+  if (!name) return "Channel";
   return name
     .replace(/[\(\[\{].*?[\)\]\}]/g, "")
     .replace(/(360p|720p|1080p|4k|hd|sd|24\/7|not 24\/7)/gi, "")
@@ -21,17 +21,22 @@ export function IPTVView({ pageType = "home" }: IPTVViewProps) {
   const [loading, setLoading] = useState(true);
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeCategory, setActiveCategory] = useState<string>("All");
   const [favorites, setFavorites] = useState<string[]>([]);
 
   useEffect(() => {
     const savedFavs = localStorage.getItem("techstream_favs");
-    if (savedFavs) setFavorites(JSON.parse(savedFavs));
+    if (savedFavs) {
+      try {
+        setFavorites(JSON.parse(savedFavs));
+      } catch (e) {
+        console.error(e);
+      }
+    }
 
     fetch("/api/iptv")
       .then((res) => res.json())
       .then((data) => {
-        if (data.success && data.categories.length > 0) {
+        if (data && data.success && Array.isArray(data.categories)) {
           setCategories(data.categories);
         }
         setLoading(false);
@@ -42,36 +47,35 @@ export function IPTVView({ pageType = "home" }: IPTVViewProps) {
       });
   }, []);
 
-  const allChannels = categories.flatMap((cat) => cat.channels);
+  const getFilteredCategories = () => {
+    if (!categories || categories.length === 0) return [];
 
-  // Kuchuja kulingana na ukurasa kwa ukamilifu
-  const getPageFilteredCategories = () => {
     return categories.map((cat) => {
-      let filtered = cat.channels;
-      const catNameLower = cat.name.toLowerCase();
+      let filtered = cat.channels || [];
+      const catNameLower = (cat.name || "").toLowerCase();
 
       if (pageType === "movies") {
-        filtered = cat.channels.filter(
+        filtered = filtered.filter(
           (c) =>
             (/movie|cinema|film|vod|action|hbo|box|thriller|comedy|horror/i.test(
-              c.name + " " + c.group
+              (c.name || "") + " " + (c.group || "")
             ) || /movie|cinema|film|vod/i.test(catNameLower)) &&
-            !/news|tbc|bbc|cnn|live|sports|habari/i.test(c.name + " " + c.group)
+            !/news|tbc|bbc|cnn|live|sports|habari/i.test((c.name || "") + " " + (c.group || ""))
         );
       } else if (pageType === "series") {
-        filtered = cat.channels.filter(
+        filtered = filtered.filter(
           (c) =>
             (/series|serial|drama|show|season|episode/i.test(
-              c.name + " " + c.group
+              (c.name || "") + " " + (c.group || "")
             ) || /series|serial|drama/i.test(catNameLower)) &&
-            !/news|tbc|bbc|live/i.test(c.name + " " + c.group)
+            !/news|tbc|bbc|live/i.test((c.name || "") + " " + (c.group || ""))
         );
       } else if (pageType === "live-tv") {
-        filtered = cat.channels.filter(
+        filtered = filtered.filter(
           (c) =>
             /live|news|sport|habari|michezo|tbc|bbc|cnn|supersport|tv/i.test(
-              c.name + " " + c.group
-            ) && !/vod|movie|series/i.test(c.group)
+              (c.name || "") + " " + (c.group || "")
+            ) && !/vod|movie|series/i.test(c.group || "")
         );
       }
 
@@ -79,18 +83,17 @@ export function IPTVView({ pageType = "home" }: IPTVViewProps) {
         ...cat,
         channels: filtered,
       };
-    }).filter((cat) => cat.channels.length > 0);
+    }).filter((cat) => cat.channels && cat.channels.length > 0);
   };
 
-  const processedCategories = getPageFilteredCategories();
-  const flattenedPageChannels = processedCategories.flatMap((cat) => cat.channels);
+  const processedCategories = getFilteredCategories();
+  const flattenedChannels = processedCategories.flatMap((cat) => cat.channels);
 
-  // Auto-play chaneli ya kwanza
   useEffect(() => {
-    if (flattenedPageChannels.length > 0 && !selectedChannel) {
-      setSelectedChannel(flattenedPageChannels[0]);
+    if (flattenedChannels.length > 0 && !selectedChannel) {
+      setSelectedChannel(flattenedChannels[0]);
     }
-  }, [flattenedPageChannels, selectedChannel]);
+  }, [flattenedChannels, selectedChannel]);
 
   const toggleFavorite = (chId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -104,7 +107,6 @@ export function IPTVView({ pageType = "home" }: IPTVViewProps) {
     localStorage.setItem("techstream_favs", JSON.stringify(updated));
   };
 
-  // MASSIVE MODERN LOADER (BIG, GLOWING, NO TEXT, NO VERSION TAG)
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center relative overflow-hidden">
@@ -119,12 +121,12 @@ export function IPTVView({ pageType = "home" }: IPTVViewProps) {
     );
   }
 
-  const heroChannel = selectedChannel || flattenedPageChannels[0];
+  const heroChannel = selectedChannel || flattenedChannels[0];
 
   return (
     <div className="min-h-screen bg-black text-white p-4 pb-36 space-y-5 selection:bg-red-600 selection:text-white">
       
-      {/* 1. TOP HEADER APP BAR (NO VERSION TAG) */}
+      {/* HEADER */}
       <div className="flex items-center justify-between pt-1">
         <div className="flex items-center space-x-3">
           <div className="relative">
@@ -151,7 +153,7 @@ export function IPTVView({ pageType = "home" }: IPTVViewProps) {
         </div>
       </div>
 
-      {/* 2. SEARCH BAR */}
+      {/* SEARCH */}
       <div className="relative w-full">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
         <input
@@ -163,7 +165,7 @@ export function IPTVView({ pageType = "home" }: IPTVViewProps) {
         />
       </div>
 
-      {/* 3. STICKY ACTIVE VIDEO PLAYER (HAPOTEI WAKATI WA KUSLIDE) */}
+      {/* STICKY PLAYER */}
       {heroChannel && (
         <div className="sticky top-2 z-30 bg-zinc-950/95 backdrop-blur-2xl border border-zinc-800/90 rounded-3xl p-3 shadow-2xl space-y-2">
           <div className="flex items-center justify-between px-1">
@@ -191,7 +193,7 @@ export function IPTVView({ pageType = "home" }: IPTVViewProps) {
         </div>
       )}
 
-      {/* 4. CATEGORIES AS HORIZONTAL ROWS (KAMA NETFLIX/YOUTUBE - SLIDE KUSHOTO KWENDA KULIA) */}
+      {/* CATEGORIES ROWS */}
       {processedCategories.length === 0 ? (
         <div className="text-center py-12 bg-zinc-900/40 rounded-3xl border border-zinc-800/50 text-zinc-500 text-xs font-bold">
           Hakuna maudhui yaliyopatikana kwa sasa.
@@ -199,9 +201,8 @@ export function IPTVView({ pageType = "home" }: IPTVViewProps) {
       ) : (
         <div className="space-y-6 pt-2">
           {processedCategories.map((cat) => {
-            // Kama kuna search query, chuja chaneli zinazohusika kwenye kundi hili
-            const filteredCatChannels = cat.channels.filter((ch) =>
-              cleanName(ch.name).toLowerCase().includes(searchQuery.toLowerCase())
+            const filteredCatChannels = (cat.channels || []).filter((ch) =>
+              cleanName(ch.name || "").toLowerCase().includes(searchQuery.toLowerCase())
             );
 
             if (filteredCatChannels.length === 0) return null;
@@ -217,7 +218,6 @@ export function IPTVView({ pageType = "home" }: IPTVViewProps) {
                   </span>
                 </div>
 
-                {/* HORIZONTAL CAROUSEL (SLIDE KUSHOTO KWENDA KULIA) */}
                 <div className="flex space-x-3 overflow-x-auto no-scrollbar pb-2 pt-1">
                   {filteredCatChannels.map((ch) => {
                     const cleanedName = cleanName(ch.name);
@@ -226,7 +226,7 @@ export function IPTVView({ pageType = "home" }: IPTVViewProps) {
 
                     return (
                       <div
-                        key={ch.id}
+                        key={ch.id || Math.random()}
                         onClick={() => setSelectedChannel(ch)}
                         className={`min-w-[170px] max-w-[170px] bg-zinc-900/80 backdrop-blur-md border rounded-2xl p-3 flex flex-col justify-between cursor-pointer transition-all active:scale-95 flex-shrink-0 ${
                           isSelected
