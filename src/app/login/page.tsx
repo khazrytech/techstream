@@ -15,7 +15,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "error" | "success"; text: string } | null>(null);
 
-  // Hatua ya 1: Kutuma Maombi ya Usajili / Kuingia
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -50,7 +49,6 @@ export default function LoginPage() {
     }
   };
 
-  // Hatua ya 2: Kuthibitisha Kodi ya OTP
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -65,7 +63,7 @@ export default function LoginPage() {
 
       if (error) throw error;
 
-      setMessage({ type: "success", text: "Uthibitisho umefanikiwa! Unaelekewa kwenye app..." });
+      setMessage({ type: "success", text: "Uthibitisho umefanikiwa! Unaelekezwa kwenye app..." });
       setTimeout(() => {
         router.push("/");
       }, 1200);
@@ -78,21 +76,18 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center p-4 selection:bg-red-600 selection:text-white relative overflow-hidden">
-      {/* Background Glow */}
       <div className="absolute w-80 h-80 bg-red-600/15 rounded-full blur-[120px] pointer-events-none"></div>
 
       <div className="w-full max-w-sm bg-zinc-950/90 border border-zinc-800/80 p-6 rounded-3xl shadow-2xl backdrop-blur-xl relative z-10 space-y-6">
         
-        {/* LOGO & TITLE */}
         <div className="text-center space-y-2">
           <div className="w-14 h-14 bg-gradient-to-tr from-red-700 via-red-600 to-rose-500 rounded-2xl flex items-center justify-center shadow-lg shadow-red-600/40 border border-red-400/30 mx-auto">
             <Tv className="w-7 h-7 text-white" />
           </div>
           <h1 className="text-xl font-black tracking-tight text-white">TechStream</h1>
-          <p className="text-xs text-zinc-400 font-medium">Anza safari yako hapa</p>
+          <p className="text-xs text-zinc-400 font-medium">Thibitisha Akaunti Yako</p>
         </div>
 
-        {/* NOTIFICATION MESSAGES */}
         {message && (
           <div
             className={`p-3.5 rounded-2xl border text-xs flex items-center space-x-2.5 ${
@@ -110,10 +105,8 @@ export default function LoginPage() {
           </div>
         )}
 
-        {/* HATUA YA 1: EMAIL & PASSWORD */}
         {step === "auth" ? (
           <form onSubmit={handleAuth} className="space-y-4">
-            {/* SWITCH TABS (INGIA / JISAJILI) */}
             <div className="grid grid-cols-2 p-1 bg-zinc-900 border border-zinc-800 rounded-xl text-xs font-bold">
               <button
                 type="button"
@@ -185,29 +178,28 @@ export default function LoginPage() {
             </button>
           </form>
         ) : (
-          /* HATUA YA 2: INGIZA KODI YA OTP */
           <form onSubmit={handleVerifyOtp} className="space-y-4">
             <div className="text-center space-y-1">
               <p className="text-xs text-zinc-300">
-                Tumeutuma kodi ya tarakimu 6 kwenda:
+                Tumeutuma kodi ya OTP kwenda:
               </p>
               <p className="text-xs font-bold text-red-400 truncate">{email}</p>
             </div>
 
             <div>
               <label className="block text-[11px] font-bold text-zinc-400 mb-1.5 uppercase tracking-wider text-center">
-                Ingiza Kodi ya OTP
+                Ingiza Kodi ya OTP (Tarakimu 8)
               </label>
               <div className="relative">
                 <KeyRound className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                 <input
                   type="text"
                   required
-                  maxLength={6}
+                  maxLength={8}
                   value={otpCode}
                   onChange={(e) => setOtpCode(e.target.value)}
-                  placeholder="123456"
-                  className="w-full bg-zinc-900/90 border border-zinc-800 text-center text-lg tracking-[8px] font-black text-white pl-10 pr-4 py-3 rounded-xl focus:outline-none focus:border-red-600 transition-all placeholder:text-zinc-700 placeholder:tracking-normal placeholder:font-normal placeholder:text-xs"
+                  placeholder="12345678"
+                  className="w-full bg-zinc-900/90 border border-zinc-800 text-center text-base tracking-[6px] font-black text-white pl-10 pr-4 py-3 rounded-xl focus:outline-none focus:border-red-600 transition-all placeholder:text-zinc-700 placeholder:tracking-normal placeholder:font-normal placeholder:text-xs"
                 />
               </div>
             </div>
@@ -217,7 +209,7 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 text-white font-black text-xs uppercase tracking-widest py-3.5 rounded-xl shadow-lg shadow-red-600/30 transition-all active:scale-95 flex items-center justify-center space-x-2 disabled:opacity-50"
             >
-              {loading ? <span>Inathibitisha...</span> : <span>Thibitisha OTP</span>}
+              {loading ? <span>Inathibitisha...</span> : <span>THIBITISHA OTP</span>}
             </button>
 
             <button
@@ -225,7 +217,7 @@ export default function LoginPage() {
               onClick={() => setStep("auth")}
               className="w-full text-zinc-500 hover:text-zinc-300 text-xs text-center font-bold pt-2 block"
             >
-              ← Rudi Nyuma
+              Rudi nyuma
             </button>
           </form>
         )}
