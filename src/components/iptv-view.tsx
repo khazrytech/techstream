@@ -2,32 +2,11 @@
 
 import React, { useEffect, useState, useMemo } from "react";
 import { 
-  Search, 
-  Heart, 
-  Tv, 
-  Bell, 
-  User, 
-  ShieldCheck, 
-  Flame, 
-  Radio, 
-  X,
-  LogOut,
-  Settings,
-  Sparkles,
-  Smartphone,
-  Zap,
-  CheckCircle2,
-  Lock,
-  ChevronRight,
-  Database,
-  Globe,
-  Clock,
-  Trash2,
-  HelpCircle,
-  Activity,
-  CreditCard,
-  Shield,
-  MessageSquare
+  Search, Heart, Tv, Bell, User, ShieldCheck, Flame, Radio, X,
+  LogOut, Settings, Sparkles, Smartphone, Zap, CheckCircle2, Lock,
+  ChevronRight, Database, Globe, Trash2, HelpCircle, CreditCard,
+  PhoneCall, Calendar, Maximize2, Volume2, VolumeX, Clock, Play,
+  Film, Trophy, Newspaper, Sliders, Check
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
@@ -36,6 +15,111 @@ import { Channel, CategoryGroup } from "@/lib/iptv-parser";
 interface IPTVViewProps {
   pageType?: "home" | "movies" | "series" | "live-tv";
 }
+
+const dict = {
+  sw: {
+    freePlan: "Akaunti ya Kawaida",
+    vipPlan: "VIP Subscribed",
+    searchPlaceholder: "Tafuta chaneli, michezo, au muvi...",
+    upgradeVip: "Jiunge na VIP Paket",
+    upgradeSub: "Tazama chaneli zote za 4K bila matangazo wala kukwama",
+    getVip: "Lipia VIP Sasa",
+    vipActive: "VIP Package Ipo Active!",
+    expires: "Inaisha tarehe",
+    favs: "Pendwa",
+    cache: "Hifadhi (Cache)",
+    server: "Server Status",
+    appLanguage: "Lugha ya App (Language)",
+    playback: "Mfumo wa Uchezaji & Data",
+    autoPlay: "Auto-Play Stream",
+    autoPlayDesc: "Cheza mara moja ukichagua chaneli",
+    hdMode: "Ubora wa 4K / HD",
+    hdModeDesc: "Lazimisha muonekano wa hali ya juu",
+    dataSaver: "Okoa Bando (Data Saver)",
+    dataSaverDesc: "Punguza matumizi makubwa ya intaneti",
+    security: "Usalama na Faragha",
+    parental: "Parental Control (PIN)",
+    parentalDesc: "Funga chaneli za watu wazima",
+    tools: "Zana na Hifadhi",
+    clearCache: "Futa Cache ya App",
+    used: "zimetumika",
+    clearNow: "Futa Sasa",
+    support: "Msaada na Huduma kwa Wateja",
+    report: "Ripoti Tatizo / Msaada wa Haraka",
+    logout: "TOKA KWENYE AKAUNTI (LOGOUT)",
+    notifications: "Taarifa na Ujumbe",
+    close: "Funga",
+    all: "Zote",
+    sports: "Michezo",
+    news: "Habari",
+    movies: "Filamu",
+    epgTitle: "RATIBA YA VIPINDI (EPG GUIDE)",
+    nowPlaying: "Inayoonyeshwa Sasa",
+    nextUp: "Inayofuata",
+    payModalTitle: "Chagua Kifurushi cha VIP",
+    payModalSub: "Pata chaneli zaidi ya 10,000 za Live TV na Vod Muvi",
+    selectPlan: "1. Chagua Kifurushi",
+    weekly: "Wiki 1 - TZS 2,000",
+    monthly: "Mwezi 1 - TZS 5,000",
+    yearly: "Mwaka 1 - TZS 45,000",
+    selectPayment: "2. Njia ya Malipo",
+    enterPhone: "Namba yako ya Simu ya Malipo",
+    payButton: "Kamilisha Malipo",
+    processing: "Inakamilisha Malipo...",
+    quality: "Ubora",
+  },
+  en: {
+    freePlan: "Standard Free Plan",
+    vipPlan: "VIP Subscribed",
+    searchPlaceholder: "Search channels, sports, or movies...",
+    upgradeVip: "Upgrade to VIP Package",
+    upgradeSub: "Unlock all 4K channels with zero ads and no buffering",
+    getVip: "Subscribe VIP Now",
+    vipActive: "VIP Package Active!",
+    expires: "Expires on",
+    favs: "Favorites",
+    cache: "Cache Storage",
+    server: "Server Status",
+    appLanguage: "App Language",
+    playback: "Playback & Data Settings",
+    autoPlay: "Auto-Play Stream",
+    autoPlayDesc: "Play automatically when channel is clicked",
+    hdMode: "4K / HD Quality Mode",
+    hdModeDesc: "Force high definition video playback",
+    dataSaver: "Data Saver Mode",
+    dataSaverDesc: "Reduce mobile data consumption",
+    security: "Security & Privacy",
+    parental: "Parental Control (PIN)",
+    parentalDesc: "Lock adult or restricted channels",
+    tools: "Tools & Storage",
+    clearCache: "Clear App Cache",
+    used: "used",
+    clearNow: "Clear Now",
+    support: "Support & Customer Service",
+    report: "Report Issue / Live Chat",
+    logout: "LOG OUT ACCOUNT",
+    notifications: "Notifications",
+    close: "Close",
+    all: "All",
+    sports: "Sports",
+    news: "News",
+    movies: "Movies",
+    epgTitle: "PROGRAMME GUIDE (EPG)",
+    nowPlaying: "Now Playing",
+    nextUp: "Next Up",
+    payModalTitle: "Select VIP Plan",
+    payModalSub: "Get access to 10,000+ Live TV channels & VOD Movies",
+    selectPlan: "1. Choose Package Plan",
+    weekly: "1 Week - TZS 2,000",
+    monthly: "1 Month - TZS 5,000",
+    yearly: "1 Year - TZS 45,000",
+    selectPayment: "2. Payment Method",
+    enterPhone: "Payment Mobile Number",
+    payButton: "Complete Payment",
+    processing: "Processing Payment...",
+    quality: "Quality",
+  }
+};
 
 const cleanName = (name: string): string => {
   if (!name) return "TechStream Channel";
@@ -52,26 +136,36 @@ export function IPTVView({ pageType = "home" }: IPTVViewProps) {
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [favorites, setFavorites] = useState<string[]>([]);
+  
   const [showProfile, setShowProfile] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
-  // Mfumo wa VIP / Subscription (Default: False / Akaunti ya Kawaida)
   const [isVip, setIsVip] = useState(false);
+  const [vipExpiryDate, setVipExpiryDate] = useState<string | null>(null);
+  
+  const [selectedPlan, setSelectedPlan] = useState<"weekly" | "monthly" | "yearly">("monthly");
+  const [paymentProvider, setPaymentProvider] = useState<"mpesa" | "tigopesa" | "airtel" | "card">("mpesa");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
-  // Kuchagua Lugha (Swahili / English)
   const [language, setLanguage] = useState<"sw" | "en">("sw");
+  const t = dict[language];
 
-  // Mipangilio ya App
   const [autoPlay, setAutoPlay] = useState(true);
   const [hdQuality, setHdQuality] = useState(false);
   const [dataSaver, setDataSaver] = useState(true);
   const [parentalControl, setParentalControl] = useState(false);
-  const [cacheSize, setCacheSize] = useState("45.2 MB");
+  const [cacheSize, setCacheSize] = useState("48.6 MB");
+  const [videoQuality, setVideoQuality] = useState<"Auto" | "1080p HD" | "4K Ultra">("Auto");
+  const [isMuted, setIsMuted] = useState(false);
+  const [activeTabFilter, setActiveTabFilter] = useState<"all" | "sports" | "news" | "movies">("all");
 
   const [notifications] = useState([
-    { id: 1, title: "Karibu TechStream", desc: "Akaunti yako ipo tayari. Furahia vipindi vya bure au ujiunge na VIP.", time: "Punde", read: false },
-    { id: 2, title: "Taarifa ya Mfumo", desc: "Tumeongeza chaneli mpya za michezo na habari.", time: "Saa 1", read: false }
+    { id: 1, title: "Karibu TechStream", desc: "Akaunti yako ipo tayari. Tumia Standard Free Plan au ujiunge na VIP kwa uzoefu bora zaidi.", time: "Punde", read: false },
+    { id: 2, title: "Taarifa ya Mfumo", desc: "Server ya Live TV imeboreshwa. Hakuna kukwama!", time: "Saa 1", read: false }
   ]);
 
   useEffect(() => {
@@ -83,15 +177,17 @@ export function IPTVView({ pageType = "home" }: IPTVViewProps) {
 
     const savedFavs = localStorage.getItem("techstream_favs");
     if (savedFavs) {
-      try {
-        setFavorites(JSON.parse(savedFavs));
-      } catch (e) {
-        console.error(e);
-      }
+      try { setFavorites(JSON.parse(savedFavs)); } catch (e) { console.error(e); }
     }
 
     const savedLang = localStorage.getItem("techstream_lang") as "sw" | "en";
     if (savedLang) setLanguage(savedLang);
+
+    const savedVipStatus = localStorage.getItem("techstream_is_vip");
+    if (savedVipStatus === "true") {
+      setIsVip(true);
+      setVipExpiryDate(localStorage.getItem("techstream_vip_expiry"));
+    }
 
     fetch("/api/iptv")
       .then((res) => res.json())
@@ -117,6 +213,35 @@ export function IPTVView({ pageType = "home" }: IPTVViewProps) {
     localStorage.setItem("techstream_lang", lang);
   };
 
+  const handlePaymentSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!phoneNumber && paymentProvider !== "card") {
+      alert(language === "sw" ? "Tafadhali weka namba ya simu ya malipo!" : "Please enter your payment mobile number!");
+      return;
+    }
+
+    setIsProcessingPayment(true);
+
+    setTimeout(() => {
+      setIsProcessingPayment(false);
+      setIsVip(true);
+      
+      const expiry = new Date();
+      if (selectedPlan === "weekly") expiry.setDate(expiry.getDate() + 7);
+      if (selectedPlan === "monthly") expiry.setMonth(expiry.getMonth() + 1);
+      if (selectedPlan === "yearly") expiry.setFullYear(expiry.getFullYear() + 1);
+      
+      const expiryString = expiry.toLocaleDateString();
+      setVipExpiryDate(expiryString);
+
+      localStorage.setItem("techstream_is_vip", "true");
+      localStorage.setItem("techstream_vip_expiry", expiryString);
+
+      setShowPaymentModal(false);
+      alert(language === "sw" ? `Hongera! Malipo yamekamilika. VIP Package yako ipo Active hadi ${expiryString}` : `Success! VIP Subscription Activated until ${expiryString}`);
+    }, 2000);
+  };
+
   const clearAppCache = () => {
     setCacheSize("0.0 MB");
     alert(language === "sw" ? "Cache imefutwa kikamilifu!" : "Cache cleared successfully!");
@@ -127,37 +252,27 @@ export function IPTVView({ pageType = "home" }: IPTVViewProps) {
 
     return categories.map((cat) => {
       let filteredChannels = cat.channels || [];
-      const catNameLower = (cat.name || "").toLowerCase();
+
+      if (activeTabFilter === "sports") {
+        filteredChannels = filteredChannels.filter((c) => /sport|michezo|supersport|ball|arena/i.test((c.name || "") + " " + (c.group || "")));
+      } else if (activeTabFilter === "news") {
+        filteredChannels = filteredChannels.filter((c) => /news|habari|tbc|bbc|cnn|al jazeera/i.test((c.name || "") + " " + (c.group || "")));
+      } else if (activeTabFilter === "movies") {
+        filteredChannels = filteredChannels.filter((c) => /movie|cinema|film|vod|action|hbo/i.test((c.name || "") + " " + (c.group || "")));
+      }
 
       if (pageType === "movies") {
-        filteredChannels = filteredChannels.filter(
-          (c) =>
-            (/movie|cinema|film|vod|action|hbo|box/i.test(
-              (c.name || "") + " " + (c.group || "")
-            ) || /movie|cinema|film/i.test(catNameLower))
-        );
+        filteredChannels = filteredChannels.filter((c) => /movie|cinema|film|vod|action/i.test((c.name || "") + " " + (c.group || "")));
       } else if (pageType === "series") {
-        filteredChannels = filteredChannels.filter(
-          (c) =>
-            (/series|serial|drama|season/i.test(
-              (c.name || "") + " " + (c.group || "")
-            ) || /series|serial/i.test(catNameLower))
-        );
-      } else if (pageType === "live-tv") {
-        filteredChannels = filteredChannels.filter(
-          (c) =>
-            /live|news|sport|habari|michezo|tbc|bbc|cnn|supersport|tv/i.test(
-              (c.name || "") + " " + (c.group || "")
-            )
-        );
+        filteredChannels = filteredChannels.filter((c) => /series|serial|drama|season/i.test((c.name || "") + " " + (c.group || "")));
       }
 
       return {
         ...cat,
-        channels: filteredChannels.slice(0, 10),
+        channels: filteredChannels.slice(0, 12),
       };
     }).filter((cat) => cat.channels && cat.channels.length > 0);
-  }, [categories, pageType]);
+  }, [categories, pageType, activeTabFilter]);
 
   const flattenedChannels = useMemo(() => {
     return processedCategories.flatMap((cat) => cat.channels);
@@ -198,9 +313,9 @@ export function IPTVView({ pageType = "home" }: IPTVViewProps) {
   const heroChannel = selectedChannel || flattenedChannels[0];
 
   return (
-    <div className="min-h-screen bg-black text-white p-4 pb-40 space-y-6 selection:bg-red-600 selection:text-white font-sans">
+    <div className="min-h-screen bg-black text-white p-4 pb-40 space-y-5 selection:bg-red-600 selection:text-white font-sans">
       
-      {/* 1. TOP BAR WITH PROFILE BUTTON */}
+      {/* HEADER */}
       <div className="flex items-center justify-between pt-1">
         <div className="flex items-center space-x-3">
           <div className="relative">
@@ -213,88 +328,124 @@ export function IPTVView({ pageType = "home" }: IPTVViewProps) {
             <span className="font-black text-lg tracking-wider bg-gradient-to-r from-white via-zinc-200 to-zinc-400 bg-clip-text text-transparent">
               TECHSTREAM
             </span>
-            <p className="text-[10px] text-zinc-500 font-semibold tracking-wider">
-              {isVip ? "VIP SUBSCRIBED" : "STANDARD FREE PLAN"}
-            </p>
+            <div className="flex items-center space-x-1.5">
+              <span className={`text-[9px] font-extrabold uppercase px-2 py-0.2 rounded-full border ${
+                isVip ? "bg-amber-500/10 border-amber-500/50 text-amber-400" : "bg-zinc-800 border-zinc-700 text-zinc-400"
+              }`}>
+                {isVip ? t.vipPlan : t.freePlan}
+              </span>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center space-x-2.5">
-          <button 
-            onClick={() => setShowNotifications(true)}
-            className="w-10 h-10 rounded-2xl bg-zinc-900/90 border border-zinc-800/80 flex items-center justify-center text-zinc-400 hover:text-white transition-all active:scale-95 shadow-md relative"
-          >
+        <div className="flex items-center space-x-2">
+          <button onClick={() => handleLanguageChange(language === "sw" ? "en" : "sw")} className="bg-zinc-900 border border-zinc-800 text-zinc-300 font-bold text-[10px] px-2.5 py-2 rounded-2xl flex items-center space-x-1 shadow-md">
+            <Globe className="w-3.5 h-3.5 text-red-500" />
+            <span>{language === "sw" ? "🇹🇿 SW" : "🇬🇧 EN"}</span>
+          </button>
+
+          <button onClick={() => setShowNotifications(true)} className="w-10 h-10 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white shadow-md relative">
             <Bell className="w-4.5 h-4.5" />
-            {notifications.some(n => !n.read) && (
-              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-600 rounded-full animate-ping"></span>
-            )}
+            {notifications.some(n => !n.read) && <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-600 rounded-full animate-ping"></span>}
           </button>
           
-          <button 
-            onClick={() => setShowProfile(true)}
-            className="flex items-center space-x-2 bg-zinc-900/90 border border-zinc-800/90 pl-1.5 pr-3 py-1.5 rounded-2xl hover:border-red-600/50 transition-all active:scale-95 shadow-lg group"
-          >
+          <button onClick={() => setShowProfile(true)} className="flex items-center space-x-1.5 bg-zinc-900 border border-zinc-800 p-1.5 rounded-2xl shadow-lg">
             <div className="w-7 h-7 bg-gradient-to-tr from-zinc-700 to-zinc-900 border border-zinc-700 rounded-xl flex items-center justify-center text-white font-black text-xs shadow-md">
               {userEmail ? userEmail.charAt(0).toUpperCase() : <User className="w-4 h-4" />}
             </div>
-            <span className="text-xs font-bold text-zinc-300 group-hover:text-white">Profile</span>
           </button>
         </div>
       </div>
 
-      {/* 2. SEARCH BAR */}
-      <div className="relative w-full">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder={language === "sw" ? "Tafuta chaneli au muvi..." : "Search channels or movies..."}
-          className="w-full bg-zinc-900/80 backdrop-blur-xl border border-zinc-800/90 rounded-2xl pl-11 pr-4 py-3.5 text-xs text-white focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600/50 transition-all placeholder:text-zinc-500 shadow-inner"
-        />
+      {!isVip && (
+        <div className="bg-gradient-to-r from-red-950 via-zinc-900 to-zinc-950 border border-red-800/60 p-3.5 rounded-3xl shadow-2xl flex items-center justify-between">
+          <div className="space-y-1">
+            <div className="flex items-center space-x-1.5">
+              <Sparkles className="w-4 h-4 text-amber-400 animate-bounce" />
+              <h3 className="text-xs font-black text-white uppercase tracking-wider">{t.upgradeVip}</h3>
+            </div>
+            <p className="text-[10px] text-zinc-400 max-w-[220px] line-clamp-1">{t.upgradeSub}</p>
+          </div>
+          <button onClick={() => setShowPaymentModal(true)} className="bg-gradient-to-r from-red-600 to-rose-600 text-white font-black text-[11px] uppercase px-3.5 py-2.5 rounded-2xl shadow-lg flex-shrink-0 border border-red-400/30">
+            {t.getVip}
+          </button>
+        </div>
+      )}
+
+      {/* SEARCH & FILTERS */}
+      <div className="space-y-3">
+        <div className="relative w-full">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+          <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder={t.searchPlaceholder} className="w-full bg-zinc-900/90 border border-zinc-800 rounded-2xl pl-11 pr-4 py-3.5 text-xs text-white focus:outline-none focus:border-red-600 shadow-inner" />
+        </div>
+
+        <div className="flex items-center space-x-2 overflow-x-auto no-scrollbar py-0.5">
+          <button onClick={() => setActiveTabFilter("all")} className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center space-x-1.5 flex-shrink-0 ${activeTabFilter === "all" ? "bg-red-600 text-white shadow-lg" : "bg-zinc-900 border border-zinc-800 text-zinc-400"}`}>
+            <Sliders className="w-3.5 h-3.5" />
+            <span>{t.all}</span>
+          </button>
+          <button onClick={() => setActiveTabFilter("sports")} className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center space-x-1.5 flex-shrink-0 ${activeTabFilter === "sports" ? "bg-red-600 text-white shadow-lg" : "bg-zinc-900 border border-zinc-800 text-zinc-400"}`}>
+            <Trophy className="w-3.5 h-3.5 text-amber-400" />
+            <span>{t.sports}</span>
+          </button>
+          <button onClick={() => setActiveTabFilter("news")} className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center space-x-1.5 flex-shrink-0 ${activeTabFilter === "news" ? "bg-red-600 text-white shadow-lg" : "bg-zinc-900 border border-zinc-800 text-zinc-400"}`}>
+            <Newspaper className="w-3.5 h-3.5 text-blue-400" />
+            <span>{t.news}</span>
+          </button>
+          <button onClick={() => setActiveTabFilter("movies")} className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center space-x-1.5 flex-shrink-0 ${activeTabFilter === "movies" ? "bg-red-600 text-white shadow-lg" : "bg-zinc-900 border border-zinc-800 text-zinc-400"}`}>
+            <Film className="w-3.5 h-3.5 text-purple-400" />
+            <span>{t.movies}</span>
+          </button>
+        </div>
       </div>
 
-      {/* 3. STICKY VIDEO PLAYER */}
+      {/* VIDEO PLAYER */}
       {heroChannel && (
         <div className="sticky top-2 z-30 bg-zinc-950/95 backdrop-blur-2xl border border-zinc-800/90 rounded-3xl p-3 shadow-2xl space-y-2.5">
           <div className="flex items-center justify-between px-1">
-            <div className="flex items-center space-x-2.5 overflow-hidden">
-              <span className="w-2.5 h-2.5 bg-red-600 rounded-full animate-ping shadow-lg shadow-red-600/60 flex-shrink-0"></span>
-              <h2 className="text-xs font-black text-white truncate tracking-wide">
-                {cleanName(heroChannel.name)}
-              </h2>
+            <div className="flex items-center space-x-2 overflow-hidden">
+              <span className="w-2.5 h-2.5 bg-red-600 rounded-full animate-ping flex-shrink-0"></span>
+              <h2 className="text-xs font-black text-white truncate tracking-wide">{cleanName(heroChannel.name)}</h2>
             </div>
-            <span className="bg-zinc-900 border border-zinc-800 text-zinc-300 text-[9px] font-bold px-2.5 py-0.5 rounded-full flex items-center space-x-1">
-              <ShieldCheck className="w-3 h-3 text-emerald-400" />
-              <span>LIVE SD/HD</span>
-            </span>
+            <div className="flex items-center space-x-2">
+              <select value={videoQuality} onChange={(e) => setVideoQuality(e.target.value as any)} className="bg-zinc-900 border border-zinc-800 text-zinc-300 text-[10px] font-bold px-2 py-1 rounded-xl outline-none">
+                <option value="Auto">Auto Quality</option>
+                <option value="1080p HD">1080p HD</option>
+                <option value="4K Ultra">4K Ultra HD</option>
+              </select>
+              <button onClick={() => setIsMuted(!isMuted)} className="bg-zinc-900 border border-zinc-800 text-zinc-300 p-1.5 rounded-xl">
+                {isMuted ? <VolumeX className="w-3.5 h-3.5 text-red-500" /> : <Volume2 className="w-3.5 h-3.5 text-emerald-400" />}
+              </button>
+            </div>
           </div>
 
           <div className="w-full aspect-video bg-black rounded-2xl overflow-hidden relative border border-zinc-800/80 shadow-inner">
-            <video
-              src={heroChannel.url}
-              controls
-              autoPlay
-              playsInline
-              className="w-full h-full object-contain"
-            />
+            <video src={heroChannel.url} controls autoPlay={autoPlay} muted={isMuted} playsInline className="w-full h-full object-contain" />
+          </div>
+
+          <div className="bg-zinc-900/80 border border-zinc-800/80 rounded-2xl p-2.5 flex items-center justify-between text-[11px]">
+            <div className="flex items-center space-x-2">
+              <Clock className="w-4 h-4 text-red-500" />
+              <div>
+                <span className="text-[9px] text-zinc-500 uppercase font-black block">{t.nowPlaying}</span>
+                <span className="font-bold text-zinc-200">Taarifa ya Habari / Live Sports</span>
+              </div>
+            </div>
+            <span className="bg-red-950 border border-red-800 text-red-400 font-black text-[9px] px-2 py-0.5 rounded-full">LIVE EPG</span>
           </div>
         </div>
       )}
 
-      {/* 4. CATEGORIES */}
+      {/* CATEGORIES */}
       {processedCategories.length === 0 ? (
         <div className="text-center py-16 bg-zinc-900/30 rounded-3xl border border-zinc-800/50 text-zinc-500 text-xs font-bold space-y-2">
           <Tv className="w-8 h-8 mx-auto text-zinc-600" />
-          <p>{language === "sw" ? "Hakuna maudhui yaliyopatikana." : "No content found."}</p>
+          <p>{language === "sw" ? "Hakuna chaneli iliyopatikana." : "No channels found."}</p>
         </div>
       ) : (
         <div className="space-y-6 pt-1">
           {processedCategories.map((cat) => {
-            const filteredCatChannels = (cat.channels || []).filter((ch) =>
-              cleanName(ch.name || "").toLowerCase().includes(searchQuery.toLowerCase())
-            );
-
+            const filteredCatChannels = (cat.channels || []).filter((ch) => cleanName(ch.name || "").toLowerCase().includes(searchQuery.toLowerCase()));
             if (filteredCatChannels.length === 0) return null;
 
             return (
@@ -304,9 +455,7 @@ export function IPTVView({ pageType = "home" }: IPTVViewProps) {
                     <Radio className="w-3.5 h-3.5 text-red-500" />
                     <span>{cat.name}</span>
                   </h3>
-                  <span className="text-[10px] text-zinc-400 font-bold bg-zinc-900 px-2.5 py-1 rounded-full border border-zinc-800 shadow-sm">
-                    {filteredCatChannels.length} / 10
-                  </span>
+                  <span className="text-[10px] text-zinc-400 font-bold bg-zinc-900 px-2.5 py-1 rounded-full border border-zinc-800">{filteredCatChannels.length} TV</span>
                 </div>
 
                 <div className="flex space-x-3.5 overflow-x-auto no-scrollbar pb-3 pt-1 px-0.5">
@@ -316,40 +465,19 @@ export function IPTVView({ pageType = "home" }: IPTVViewProps) {
                     const isFav = favorites.includes(ch.id);
 
                     return (
-                      <div
-                        key={ch.id || Math.random()}
-                        onClick={() => setSelectedChannel(ch)}
-                        className={`min-w-[160px] max-w-[160px] bg-gradient-to-b from-zinc-900/90 to-zinc-950/95 backdrop-blur-xl border rounded-2xl p-3.5 flex flex-col justify-between cursor-pointer transition-all active:scale-95 flex-shrink-0 shadow-xl ${
-                          isSelected
-                            ? "border-red-600 bg-red-950/30 ring-1 ring-red-600/60 shadow-red-600/30"
-                            : "border-zinc-800/80 hover:border-zinc-700"
-                        }`}
-                      >
+                      <div key={ch.id || Math.random()} onClick={() => setSelectedChannel(ch)} className={`min-w-[160px] max-w-[160px] bg-gradient-to-b from-zinc-900/90 to-zinc-950/95 border rounded-2xl p-3.5 flex flex-col justify-between cursor-pointer transition-all active:scale-95 flex-shrink-0 shadow-xl ${isSelected ? "border-red-600 bg-red-950/30 ring-1 ring-red-600/60" : "border-zinc-800/80"}`}>
                         <div className="flex items-center justify-between mb-4">
-                          <div className="w-11 h-11 rounded-xl bg-black flex items-center justify-center p-1.5 border border-zinc-800/90 flex-shrink-0 shadow-inner">
-                            {ch.logo ? (
-                              <img src={ch.logo} alt={cleanedName} className="w-full h-full object-contain" />
-                            ) : (
-                              <Tv className="w-5 h-5 text-red-500" />
-                            )}
+                          <div className="w-11 h-11 rounded-xl bg-black flex items-center justify-center p-1.5 border border-zinc-800/90 flex-shrink-0">
+                            {ch.logo ? <img src={ch.logo} alt={cleanedName} className="w-full h-full object-contain" /> : <Tv className="w-5 h-5 text-red-500" />}
                           </div>
-                          <button
-                            onClick={(e) => toggleFavorite(ch.id, e)}
-                            className="text-zinc-500 hover:text-red-500 transition-colors p-1"
-                          >
-                            <Heart
-                              className={`w-4 h-4 ${isFav ? "fill-red-600 text-red-600" : ""}`}
-                            />
+                          <button onClick={(e) => toggleFavorite(ch.id, e)} className="text-zinc-500 hover:text-red-500 p-1">
+                            <Heart className={`w-4 h-4 ${isFav ? "fill-red-600 text-red-600" : ""}`} />
                           </button>
                         </div>
 
                         <div className="space-y-1">
-                          <h4 className="text-xs font-black text-white line-clamp-1 tracking-tight">
-                            {cleanedName}
-                          </h4>
-                          <span className="text-[9px] text-zinc-500 font-semibold uppercase tracking-wider">
-                            Free Stream
-                          </span>
+                          <h4 className="text-xs font-black text-white line-clamp-1 tracking-tight">{cleanedName}</h4>
+                          <span className="text-[9px] text-zinc-500 font-semibold uppercase tracking-wider">{isVip ? "4K Stream" : "SD/HD Stream"}</span>
                         </div>
                       </div>
                     );
@@ -361,314 +489,159 @@ export function IPTVView({ pageType = "home" }: IPTVViewProps) {
         </div>
       )}
 
-      {/* 5. ADVANCED PROFILE & SETTINGS MODAL */}
-      {showProfile && (
-        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
-          <div className="bg-zinc-950 border border-zinc-800/90 rounded-t-[32px] sm:rounded-[32px] w-full max-w-md max-h-[88vh] overflow-y-auto no-scrollbar p-5 space-y-5 shadow-2xl relative">
-            
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3 sticky top-0 bg-zinc-950/90 backdrop-blur-md z-10">
+      {/* PAYMENT MODAL */}
+      {showPaymentModal && (
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="bg-zinc-950 border border-zinc-800 rounded-t-[32px] sm:rounded-[32px] w-full max-w-md max-h-[90vh] overflow-y-auto no-scrollbar p-5 space-y-5 shadow-2xl relative">
+            <div className="flex items-center justify-between border-b border-zinc-800 pb-3 sticky top-0 bg-zinc-950 z-10">
               <div className="flex items-center space-x-2">
-                <Settings className="w-5 h-5 text-red-500" />
-                <h3 className="font-black text-xs text-white uppercase tracking-wider">
-                  {language === "sw" ? "Akaunti na Mipangilio" : "Account & Settings"}
-                </h3>
+                <CreditCard className="w-5 h-5 text-amber-400" />
+                <h3 className="font-black text-xs text-white uppercase tracking-wider">{t.payModalTitle}</h3>
               </div>
-              <button 
-                onClick={() => setShowProfile(false)}
-                className="text-zinc-400 hover:text-white bg-zinc-900 border border-zinc-800 p-2 rounded-2xl transition-all active:scale-90"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              <button onClick={() => setShowPaymentModal(false)} className="text-zinc-400 hover:text-white bg-zinc-900 border border-zinc-800 p-1.5 rounded-2xl"><X className="w-4 h-4" /></button>
             </div>
 
-            {/* Profile User Card */}
-            <div className="bg-gradient-to-br from-zinc-900 via-zinc-900/90 to-zinc-950 border border-zinc-800 p-4 rounded-3xl space-y-3 shadow-xl">
-              <div className="flex items-center space-x-3.5">
-                <div className="w-12 h-12 bg-gradient-to-tr from-zinc-800 to-zinc-700 rounded-2xl flex items-center justify-center text-white font-black text-lg shadow-md border border-zinc-600 flex-shrink-0">
-                  {userEmail ? userEmail.charAt(0).toUpperCase() : "U"}
-                </div>
+            <p className="text-xs text-zinc-400">{t.payModalSub}</p>
 
-                <div className="space-y-0.5 overflow-hidden">
-                  <div className="flex items-center space-x-2">
-                    <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full border ${
-                      isVip 
-                        ? "bg-amber-500/10 border-amber-500/40 text-amber-400"
-                        : "bg-zinc-800 border-zinc-700 text-zinc-400"
-                    }`}>
-                      {isVip ? "VIP Active" : (language === "sw" ? "Akaunti ya Kawaida" : "Free Plan")}
-                    </span>
+            <form onSubmit={handlePaymentSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-zinc-400">{t.selectPlan}</label>
+                <div className="grid grid-cols-1 gap-2">
+                  <div onClick={() => setSelectedPlan("weekly")} className={`p-3 rounded-2xl border flex items-center justify-between cursor-pointer ${selectedPlan === "weekly" ? "border-amber-500 bg-amber-950/20" : "border-zinc-800 bg-zinc-900/60"}`}>
+                    <div><p className="text-xs font-bold text-white">{t.weekly}</p><p className="text-[10px] text-zinc-500">Siku 7 za VIP</p></div>
+                    {selectedPlan === "weekly" && <Check className="w-4 h-4 text-amber-400" />}
                   </div>
-                  <h4 className="font-bold text-xs text-white truncate">{userEmail || "user@example.com"}</h4>
-                  <p className="text-[10px] text-zinc-400 flex items-center space-x-1">
-                    <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-                    <span>{language === "sw" ? "Imethibitishwa" : "Verified User"}</span>
-                  </p>
+                  <div onClick={() => setSelectedPlan("monthly")} className={`p-3 rounded-2xl border flex items-center justify-between cursor-pointer ${selectedPlan === "monthly" ? "border-amber-500 bg-amber-950/20" : "border-zinc-800 bg-zinc-900/60"}`}>
+                    <div><p className="text-xs font-bold text-white">{t.monthly}</p><p className="text-[10px] text-amber-400 font-semibold">Inapendekezwa</p></div>
+                    {selectedPlan === "monthly" && <Check className="w-4 h-4 text-amber-400" />}
+                  </div>
+                  <div onClick={() => setSelectedPlan("yearly")} className={`p-3 rounded-2xl border flex items-center justify-between cursor-pointer ${selectedPlan === "yearly" ? "border-amber-500 bg-amber-950/20" : "border-zinc-800 bg-zinc-900/60"}`}>
+                    <div><p className="text-xs font-bold text-white">{t.yearly}</p><p className="text-[10px] text-emerald-400">Okoa 30% Off</p></div>
+                    {selectedPlan === "yearly" && <Check className="w-4 h-4 text-amber-400" />}
+                  </div>
                 </div>
               </div>
 
-              {/* VIP Subscription CTA */}
-              {!isVip ? (
-                <div className="bg-gradient-to-r from-red-950/60 to-zinc-900 border border-red-800/50 p-3 rounded-2xl flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <p className="text-xs font-black text-white flex items-center space-x-1">
-                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                      <span>{language === "sw" ? "Jiunge na VIP Paket" : "Upgrade to VIP"}</span>
-                    </p>
-                    <p className="text-[10px] text-zinc-400">
-                      {language === "sw" ? "Tazama chaneli zote za 4K bila matangazo" : "Unlock all 4K channels without ads"}
-                    </p>
-                  </div>
-                  <button 
-                    onClick={() => setIsVip(true)}
-                    className="bg-gradient-to-r from-red-700 to-rose-600 hover:from-red-600 hover:to-rose-500 text-white font-black text-[10px] uppercase px-3 py-2 rounded-xl shadow-lg transition-all active:scale-95 flex-shrink-0"
-                  >
-                    {language === "sw" ? "Anza VIP" : "Get VIP"}
-                  </button>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-zinc-400">{t.selectPayment}</label>
+                <div className="grid grid-cols-4 gap-2">
+                  <button type="button" onClick={() => setPaymentProvider("mpesa")} className={`p-2 rounded-xl border text-[10px] font-bold ${paymentProvider === "mpesa" ? "border-red-600 bg-red-950/40 text-white" : "border-zinc-800 bg-zinc-900 text-zinc-400"}`}>M-Pesa</button>
+                  <button type="button" onClick={() => setPaymentProvider("tigopesa")} className={`p-2 rounded-xl border text-[10px] font-bold ${paymentProvider === "tigopesa" ? "border-blue-600 bg-blue-950/40 text-white" : "border-zinc-800 bg-zinc-900 text-zinc-400"}`}>TigoPesa</button>
+                  <button type="button" onClick={() => setPaymentProvider("airtel")} className={`p-2 rounded-xl border text-[10px] font-bold ${paymentProvider === "airtel" ? "border-rose-600 bg-rose-950/40 text-white" : "border-zinc-800 bg-zinc-900 text-zinc-400"}`}>Airtel</button>
+                  <button type="button" onClick={() => setPaymentProvider("card")} className={`p-2 rounded-xl border text-[10px] font-bold ${paymentProvider === "card" ? "border-emerald-600 bg-emerald-950/40 text-white" : "border-zinc-800 bg-zinc-900 text-zinc-400"}`}>Card</button>
                 </div>
-              ) : (
-                <div className="bg-emerald-950/40 border border-emerald-800/50 p-2.5 rounded-2xl text-center">
-                  <p className="text-[10px] font-bold text-emerald-400">
-                    {language === "sw" ? "Subscription yako ya VIP ipo Active!" : "Your VIP Subscription is Active!"}
-                  </p>
+              </div>
+
+              {paymentProvider !== "card" && (
+                <div className="space-y-1">
+                  <label className="text-[10px] text-zinc-400 font-bold">{t.enterPhone}</label>
+                  <input type="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="0712 345 678" className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-4 py-3 text-xs text-white focus:border-amber-500" />
                 </div>
               )}
-            </div>
 
-            {/* Quick Stats Grid */}
-            <div className="grid grid-cols-3 gap-2">
-              <div className="bg-zinc-900/80 border border-zinc-800/80 p-2.5 rounded-2xl text-center space-y-0.5">
-                <p className="text-[9px] text-zinc-500 font-bold uppercase">{language === "sw" ? "Favs" : "Favorites"}</p>
-                <p className="text-xs font-black text-white">{favorites.length} TV</p>
-              </div>
-              <div className="bg-zinc-900/80 border border-zinc-800/80 p-2.5 rounded-2xl text-center space-y-0.5">
-                <p className="text-[9px] text-zinc-500 font-bold uppercase">Cache</p>
-                <p className="text-xs font-black text-amber-400">{cacheSize}</p>
-              </div>
-              <div className="bg-zinc-900/80 border border-zinc-800/80 p-2.5 rounded-2xl text-center space-y-0.5">
-                <p className="text-[9px] text-zinc-500 font-bold uppercase">Server</p>
-                <p className="text-xs font-black text-emerald-400">Fast HD</p>
-              </div>
-            </div>
-
-            {/* SECTION 1: LANGUAGE SELECTOR */}
-            <div className="space-y-2">
-              <h5 className="text-[10px] font-black uppercase tracking-wider text-zinc-400 px-1 flex items-center space-x-1.5">
-                <Globe className="w-3.5 h-3.5 text-red-500" />
-                <span>{language === "sw" ? "Lugha ya Mfumo (Language)" : "App Language"}</span>
-              </h5>
-              <div className="grid grid-cols-2 gap-2 p-1 bg-zinc-900/90 border border-zinc-800 rounded-2xl text-xs font-bold">
-                <button
-                  type="button"
-                  onClick={() => handleLanguageChange("sw")}
-                  className={`py-2.5 rounded-xl transition-all flex items-center justify-center space-x-2 ${
-                    language === "sw" ? "bg-red-600 text-white shadow-lg" : "text-zinc-500 hover:text-zinc-300"
-                  }`}
-                >
-                  <span>🇹🇿 Kiswahili</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleLanguageChange("en")}
-                  className={`py-2.5 rounded-xl transition-all flex items-center justify-center space-x-2 ${
-                    language === "en" ? "bg-red-600 text-white shadow-lg" : "text-zinc-500 hover:text-zinc-300"
-                  }`}
-                >
-                  <span>🇬🇧 English</span>
-                </button>
-              </div>
-            </div>
-
-            {/* SECTION 2: STREAMING & PLAYBACK */}
-            <div className="space-y-2">
-              <h5 className="text-[10px] font-black uppercase tracking-wider text-zinc-400 px-1">
-                {language === "sw" ? "Mfumo wa Uchezaji" : "Playback & Data"}
-              </h5>
-              <div className="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl divide-y divide-zinc-800/60">
-                <div className="p-3 flex items-center justify-between">
-                  <div className="flex items-center space-x-2.5">
-                    <Zap className="w-4 h-4 text-amber-400" />
-                    <div>
-                      <p className="text-xs font-bold text-white">Auto-Play</p>
-                      <p className="text-[10px] text-zinc-500">
-                        {language === "sw" ? "Cheza mara moja ukichagua chaneli" : "Play automatically when selected"}
-                      </p>
-                    </div>
-                  </div>
-                  <input 
-                    type="checkbox" 
-                    checked={autoPlay} 
-                    onChange={() => setAutoPlay(!autoPlay)}
-                    className="accent-red-600 w-4 h-4 rounded cursor-pointer"
-                  />
-                </div>
-
-                <div className="p-3 flex items-center justify-between">
-                  <div className="flex items-center space-x-2.5">
-                    <Sparkles className="w-4 h-4 text-red-500" />
-                    <div>
-                      <p className="text-xs font-bold text-white">HD / 4K Mode</p>
-                      <p className="text-[10px] text-zinc-500">
-                        {language === "sw" ? "Tumia ubora wa juu pekee" : "Force high definition streams"}
-                      </p>
-                    </div>
-                  </div>
-                  <input 
-                    type="checkbox" 
-                    checked={hdQuality} 
-                    onChange={() => setHdQuality(!hdQuality)}
-                    className="accent-red-600 w-4 h-4 rounded cursor-pointer"
-                  />
-                </div>
-
-                <div className="p-3 flex items-center justify-between">
-                  <div className="flex items-center space-x-2.5">
-                    <Database className="w-4 h-4 text-blue-400" />
-                    <div>
-                      <p className="text-xs font-bold text-white">Data Saver</p>
-                      <p className="text-[10px] text-zinc-500">
-                        {language === "sw" ? "Okoa matumizi ya bando" : "Reduce internet data usage"}
-                      </p>
-                    </div>
-                  </div>
-                  <input 
-                    type="checkbox" 
-                    checked={dataSaver} 
-                    onChange={() => setDataSaver(!dataSaver)}
-                    className="accent-red-600 w-4 h-4 rounded cursor-pointer"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* SECTION 3: SECURITY & PARENTAL CONTROL */}
-            <div className="space-y-2">
-              <h5 className="text-[10px] font-black uppercase tracking-wider text-zinc-400 px-1">
-                {language === "sw" ? "Usalama na Faragha" : "Security & Privacy"}
-              </h5>
-              <div className="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl divide-y divide-zinc-800/60">
-                <div className="p-3 flex items-center justify-between">
-                  <div className="flex items-center space-x-2.5">
-                    <Lock className="w-4 h-4 text-purple-400" />
-                    <div>
-                      <p className="text-xs font-bold text-white">Parental Control (PIN)</p>
-                      <p className="text-[10px] text-zinc-500">
-                        {language === "sw" ? "Funga chaneli za watu wazima" : "Lock adult/restricted channels"}
-                      </p>
-                    </div>
-                  </div>
-                  <input 
-                    type="checkbox" 
-                    checked={parentalControl} 
-                    onChange={() => setParentalControl(!parentalControl)}
-                    className="accent-red-600 w-4 h-4 rounded cursor-pointer"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* SECTION 4: STORAGE & UTILITIES */}
-            <div className="space-y-2">
-              <h5 className="text-[10px] font-black uppercase tracking-wider text-zinc-400 px-1">
-                {language === "sw" ? "Zana na Hifadhi" : "Tools & Storage"}
-              </h5>
-              <div className="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-3 flex items-center justify-between">
-                <div className="flex items-center space-x-2.5">
-                  <Trash2 className="w-4 h-4 text-rose-400" />
-                  <div>
-                    <p className="text-xs font-bold text-white">{language === "sw" ? "Futa Cache za App" : "Clear App Cache"}</p>
-                    <p className="text-[10px] text-zinc-500">{cacheSize} {language === "sw" ? "zimetumika" : "used"}</p>
-                  </div>
-                </div>
-                <button
-                  onClick={clearAppCache}
-                  className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[10px] font-bold px-3 py-1.5 rounded-xl border border-zinc-700 active:scale-95 transition-all"
-                >
-                  {language === "sw" ? "Futa Sasa" : "Clear Now"}
-                </button>
-              </div>
-            </div>
-
-            {/* SECTION 5: SUPPORT & HELP */}
-            <div className="space-y-2">
-              <h5 className="text-[10px] font-black uppercase tracking-wider text-zinc-400 px-1">
-                {language === "sw" ? "Msaada na Usaidizi" : "Support & Help"}
-              </h5>
-              <div className="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl divide-y divide-zinc-800/60">
-                <button 
-                  onClick={() => alert(language === "sw" ? "Wasiliana na Msaada: support@techstream.com" : "Contact Support: support@techstream.com")}
-                  className="w-full p-3 flex items-center justify-between text-left hover:bg-zinc-900/80 transition-colors"
-                >
-                  <div className="flex items-center space-x-2.5">
-                    <HelpCircle className="w-4 h-4 text-emerald-400" />
-                    <span className="text-xs font-bold text-white">{language === "sw" ? "Ripoti Tatizo / Live Chat" : "Report Issue / Support"}</span>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-zinc-500" />
-                </button>
-              </div>
-            </div>
-
-            {/* Device & Engine Info */}
-            <div className="bg-zinc-900/40 border border-zinc-800/60 rounded-2xl p-3 flex items-center justify-between text-xs text-zinc-400">
-              <div className="flex items-center space-x-2">
-                <Smartphone className="w-4 h-4 text-zinc-500" />
-                <span>Engine: TechStream v2.4</span>
-              </div>
-              <span className="text-[10px] text-emerald-400 font-bold bg-emerald-950/60 border border-emerald-800/60 px-2 py-0.5 rounded-full">
-                Online
-              </span>
-            </div>
-
-            {/* Modern Logout Button */}
-            <button
-              onClick={handleLogout}
-              className="w-full bg-gradient-to-r from-red-700 via-red-600 to-rose-600 hover:from-red-600 hover:to-rose-500 text-white font-black text-xs uppercase tracking-widest py-3.5 rounded-2xl shadow-xl shadow-red-600/25 transition-all active:scale-95 flex items-center justify-center space-x-2 border border-red-500/30"
-            >
-              <LogOut className="w-4 h-4" />
-              <span>{language === "sw" ? "TOKA KWENYE AKAUNTI (LOGOUT)" : "LOG OUT ACCOUNT"}</span>
-            </button>
-
+              <button type="submit" disabled={isProcessingPayment} className="w-full bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-500 text-black font-black text-xs uppercase py-3.5 rounded-2xl shadow-xl flex items-center justify-center space-x-2">
+                {isProcessingPayment ? <span>{t.processing}</span> : <><ShieldCheck className="w-4 h-4" /><span>{t.payButton}</span></>}
+              </button>
+            </form>
           </div>
         </div>
       )}
 
-      {/* 6. NOTIFICATIONS MODAL */}
+      {/* PROFILE MODAL */}
+      {showProfile && (
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="bg-zinc-950 border border-zinc-800 rounded-t-[32px] sm:rounded-[32px] w-full max-w-md max-h-[88vh] overflow-y-auto no-scrollbar p-5 space-y-5 shadow-2xl relative">
+            <div className="flex items-center justify-between border-b border-zinc-800 pb-3 sticky top-0 bg-zinc-950 z-10">
+              <div className="flex items-center space-x-2">
+                <Settings className="w-5 h-5 text-red-500" />
+                <h3 className="font-black text-xs text-white uppercase tracking-wider">{language === "sw" ? "Akaunti na Mipangilio" : "Account & Settings"}</h3>
+              </div>
+              <button onClick={() => setShowProfile(false)} className="text-zinc-400 hover:text-white bg-zinc-900 border border-zinc-800 p-1.5 rounded-2xl"><X className="w-4 h-4" /></button>
+            </div>
+
+            <div className="bg-gradient-to-br from-zinc-900 to-zinc-950 border border-zinc-800 p-4 rounded-3xl space-y-3 shadow-xl">
+              <div className="flex items-center space-x-3.5">
+                <div className="w-12 h-12 bg-gradient-to-tr from-zinc-800 to-zinc-700 rounded-2xl flex items-center justify-center text-white font-black text-lg border border-zinc-600 flex-shrink-0">
+                  {userEmail ? userEmail.charAt(0).toUpperCase() : "U"}
+                </div>
+                <div className="space-y-0.5 overflow-hidden">
+                  <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full border ${isVip ? "bg-amber-500/10 border-amber-500/40 text-amber-400" : "bg-zinc-800 border-zinc-700 text-zinc-400"}`}>{isVip ? t.vipPlan : t.freePlan}</span>
+                  <h4 className="font-bold text-xs text-white truncate">{userEmail || "user@example.com"}</h4>
+                  {isVip && <p className="text-[10px] text-amber-400 font-semibold flex items-center space-x-1"><Calendar className="w-3 h-3" /><span>{t.expires}: {vipExpiryDate || "30/10/2026"}</span></p>}
+                </div>
+              </div>
+
+              {!isVip ? (
+                <button onClick={() => { setShowProfile(false); setShowPaymentModal(true); }} className="w-full bg-gradient-to-r from-red-600 to-rose-600 text-white font-black text-[11px] uppercase py-2.5 rounded-xl shadow-lg">{t.getVip}</button>
+              ) : (
+                <div className="bg-emerald-950/40 border border-emerald-800/50 p-2 rounded-xl text-center"><p className="text-[10px] font-bold text-emerald-400">{t.vipActive}</p></div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <h5 className="text-[10px] font-black uppercase text-zinc-400 px-1">{t.appLanguage}</h5>
+              <div className="grid grid-cols-2 gap-2 p-1 bg-zinc-900 border border-zinc-800 rounded-2xl text-xs font-bold">
+                <button type="button" onClick={() => handleLanguageChange("sw")} className={`py-2 rounded-xl ${language === "sw" ? "bg-red-600 text-white" : "text-zinc-500"}`}>🇹🇿 Kiswahili</button>
+                <button type="button" onClick={() => handleLanguageChange("en")} className={`py-2 rounded-xl ${language === "en" ? "bg-red-600 text-white" : "text-zinc-500"}`}>🇬🇧 English</button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <h5 className="text-[10px] font-black uppercase text-zinc-400 px-1">{t.playback}</h5>
+              <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl divide-y divide-zinc-800/60">
+                <div className="p-3 flex items-center justify-between">
+                  <div><p className="text-xs font-bold text-white">{t.autoPlay}</p><p className="text-[10px] text-zinc-500">{t.autoPlayDesc}</p></div>
+                  <input type="checkbox" checked={autoPlay} onChange={() => setAutoPlay(!autoPlay)} className="accent-red-600 w-4 h-4 cursor-pointer" />
+                </div>
+                <div className="p-3 flex items-center justify-between">
+                  <div><p className="text-xs font-bold text-white">{t.hdMode}</p><p className="text-[10px] text-zinc-500">{t.hdModeDesc}</p></div>
+                  <input type="checkbox" checked={hdQuality} onChange={() => setHdQuality(!hdQuality)} className="accent-red-600 w-4 h-4 cursor-pointer" />
+                </div>
+                <div className="p-3 flex items-center justify-between">
+                  <div><p className="text-xs font-bold text-white">{t.dataSaver}</p><p className="text-[10px] text-zinc-500">{t.dataSaverDesc}</p></div>
+                  <input type="checkbox" checked={dataSaver} onChange={() => setDataSaver(!dataSaver)} className="accent-red-600 w-4 h-4 cursor-pointer" />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <h5 className="text-[10px] font-black uppercase text-zinc-400 px-1">{t.tools}</h5>
+              <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-3 flex items-center justify-between">
+                <div><p className="text-xs font-bold text-white">{t.clearCache}</p><p className="text-[10px] text-zinc-500">{cacheSize} {t.used}</p></div>
+                <button onClick={clearAppCache} className="bg-zinc-800 text-zinc-200 text-[10px] font-bold px-3 py-1.5 rounded-xl border border-zinc-700">{t.clearNow}</button>
+              </div>
+            </div>
+
+            <button onClick={handleLogout} className="w-full bg-gradient-to-r from-red-700 via-red-600 to-rose-600 text-white font-black text-xs uppercase py-3.5 rounded-2xl shadow-xl flex items-center justify-center space-x-2">
+              <LogOut className="w-4 h-4" />
+              <span>{t.logout}</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* NOTIFICATIONS MODAL */}
       {showNotifications && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 max-w-sm w-full space-y-4 shadow-2xl relative">
             <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
               <div className="flex items-center space-x-2">
                 <Bell className="w-5 h-5 text-red-500" />
-                <h3 className="font-extrabold text-sm text-white">
-                  {language === "sw" ? "Taarifa & Ujumbe" : "Notifications"}
-                </h3>
+                <h3 className="font-extrabold text-sm text-white">{t.notifications}</h3>
               </div>
-              <button 
-                onClick={() => setShowNotifications(false)}
-                className="text-zinc-400 hover:text-white bg-zinc-800 p-1.5 rounded-full"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              <button onClick={() => setShowNotifications(false)} className="text-zinc-400 hover:text-white bg-zinc-800 p-1.5 rounded-full"><X className="w-4 h-4" /></button>
             </div>
 
             <div className="space-y-3 max-h-60 overflow-y-auto no-scrollbar">
               {notifications.map((n) => (
-                <div key={n.id} className="bg-zinc-950 border border-zinc-800/80 rounded-2xl p-3 space-y-1">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-bold text-white">{n.title}</h4>
-                    <span className="text-[9px] text-zinc-500">{n.time}</span>
-                  </div>
+                <div key={n.id} className="bg-zinc-950 border border-zinc-800 rounded-2xl p-3 space-y-1">
+                  <div className="flex items-center justify-between"><h4 className="text-xs font-bold text-white">{n.title}</h4><span className="text-[9px] text-zinc-500">{n.time}</span></div>
                   <p className="text-[11px] text-zinc-400">{n.desc}</p>
                 </div>
               ))}
             </div>
 
-            <button 
-              onClick={() => setShowNotifications(false)}
-              className="w-full bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-3 rounded-2xl transition-all shadow-lg shadow-red-600/30"
-            >
-              {language === "sw" ? "Funga" : "Close"}
-            </button>
+            <button onClick={() => setShowNotifications(false)} className="w-full bg-red-600 text-white text-xs font-bold py-3 rounded-2xl">{t.close}</button>
           </div>
         </div>
       )}
