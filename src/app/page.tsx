@@ -81,7 +81,7 @@ export default function Home() {
             const name = nameParts.length > 1 ? nameParts[nameParts.length - 1].trim() : "Channel";
 
             curr = {
-              id: Math.random().toString(36.substring(2, 9)),
+              id: Math.random().toString(36).substring(2, 9),
               name,
               logo: logoMatch ? logoMatch[1] : "",
               category: groupMatch ? groupMatch[1] : "General",
