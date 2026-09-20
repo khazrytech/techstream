@@ -122,7 +122,7 @@ export default function Home() {
     e.preventDefault();
     setAuthError("");
     if (!email || !password) {
-      setAuthError("Please fill in both email and password.");
+      setAuthError("Tafadhali jaza barua pepe na neno la siri.");
       return;
     }
     setAuthLoading(true);
@@ -151,46 +151,43 @@ export default function Home() {
     localStorage.setItem("techstream_lang", lang);
   };
 
-  // =================== LOGIN / SIGNUP VIEW (ZERO NAVIGATION BAR) ===================
+  // =================== LOGIN / SIGNUP VIEW (HAKUNA NAVIGATION BAR KABISA) ===================
   if (!user) {
     return (
-      <div className="min-h-screen bg-zinc-950 text-white flex flex-col justify-center px-6 py-12 relative overflow-hidden font-sans selection:bg-indigo-600 selection:text-white">
-        {/* Luxury Background Glow Elements */}
-        <div className="absolute top-0 -left-20 w-96 h-96 bg-indigo-600/20 rounded-full blur-[150px] animate-pulse"></div>
-        <div className="absolute bottom-0 -right-20 w-96 h-96 bg-cyan-600/20 rounded-full blur-[150px] animate-pulse"></div>
+      <div className="min-h-screen bg-zinc-950 text-white flex flex-col justify-center px-6 py-12 relative overflow-hidden font-sans selection:bg-red-600 selection:text-white">
+        <div className="absolute top-0 -left-20 w-96 h-96 bg-red-600/10 rounded-full blur-[150px] animate-pulse"></div>
+        <div className="absolute bottom-0 -right-20 w-96 h-96 bg-red-800/10 rounded-full blur-[150px] animate-pulse"></div>
 
         <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10 space-y-6">
           <div className="text-center space-y-3">
-            <div className="inline-flex w-16 h-16 bg-gradient-to-tr from-indigo-600 via-purple-600 to-cyan-500 rounded-3xl items-center justify-center shadow-2xl shadow-indigo-500/40 border border-indigo-400/30">
+            <div className="inline-flex w-16 h-16 bg-gradient-to-tr from-red-600 via-red-500 to-rose-600 rounded-3xl items-center justify-center shadow-2xl shadow-red-600/40 border border-red-400/30">
               <Sparkles className="w-8 h-8 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-black tracking-wider bg-gradient-to-r from-white via-zinc-200 to-indigo-300 bg-clip-text text-transparent">
-                TECHSTREAM PRO
+              <h1 className="text-2xl font-black tracking-wider bg-gradient-to-r from-white via-zinc-200 to-red-300 bg-clip-text text-transparent">
+                TechStream
               </h1>
               <p className="text-xs text-zinc-400 font-medium mt-1">
-                {isLoginMode ? "Sign in to access premium live streaming" : "Create your free account instantly"}
+                {isLoginMode ? "Ingia ili kuendelea na vipindi vyako unavyopenda" : "Tengeneza akaunti yako mpya hapa"}
               </p>
             </div>
           </div>
 
           <div className="bg-zinc-900/80 backdrop-blur-2xl border border-zinc-800/90 rounded-3xl p-6 shadow-2xl space-y-5 relative">
-            
-            {/* Mode Switcher Tabs */}
             <div className="grid grid-cols-2 bg-zinc-950 p-1.5 rounded-2xl border border-zinc-800/80">
               <button
                 type="button"
                 onClick={() => setIsLoginMode(true)}
-                className={`py-2 text-xs font-bold rounded-xl transition-all ${isLoginMode ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-600/30' : 'text-zinc-400 hover:text-white'}`}
+                className={`py-2 text-xs font-bold rounded-xl transition-all ${isLoginMode ? 'bg-red-600 text-white shadow-lg shadow-red-600/30' : 'text-zinc-400 hover:text-white'}`}
               >
-                Sign In
+                Ingia
               </button>
               <button
                 type="button"
                 onClick={() => setIsLoginMode(false)}
-                className={`py-2 text-xs font-bold rounded-xl transition-all ${!isLoginMode ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-600/30' : 'text-zinc-400 hover:text-white'}`}
+                className={`py-2 text-xs font-bold rounded-xl transition-all ${!isLoginMode ? 'bg-red-600 text-white shadow-lg shadow-red-600/30' : 'text-zinc-400 hover:text-white'}`}
               >
-                Sign Up
+                Tengeneza Akaunti
               </button>
             </div>
 
@@ -202,21 +199,21 @@ export default function Home() {
 
             <form onSubmit={handleAuthSubmit} className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 ml-1">Email Address</label>
+                <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 ml-1">Barua Pepe (Email)</label>
                 <div className="relative">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="name@example.com"
-                    className="w-full bg-zinc-950/90 border border-zinc-800 rounded-2xl pl-11 pr-4 py-3.5 text-xs text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all placeholder:text-zinc-600 shadow-inner"
+                    placeholder="jina@email.com"
+                    className="w-full bg-zinc-950/90 border border-zinc-800 rounded-2xl pl-11 pr-4 py-3.5 text-xs text-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all placeholder:text-zinc-600 shadow-inner"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 ml-1">Password</label>
+                <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 ml-1">Neno la Siri (Password)</label>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                   <input
@@ -224,7 +221,7 @@ export default function Home() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full bg-zinc-950/90 border border-zinc-800 rounded-2xl pl-11 pr-4 py-3.5 text-xs text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all placeholder:text-zinc-600 shadow-inner"
+                    className="w-full bg-zinc-950/90 border border-zinc-800 rounded-2xl pl-11 pr-4 py-3.5 text-xs text-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all placeholder:text-zinc-600 shadow-inner"
                   />
                 </div>
               </div>
@@ -232,13 +229,13 @@ export default function Home() {
               <button
                 type="submit"
                 disabled={authLoading}
-                className="w-full mt-2 bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-600 hover:opacity-90 text-white font-black text-xs uppercase tracking-wider py-4 rounded-2xl shadow-xl shadow-indigo-600/30 transition-all active:scale-95 flex items-center justify-center space-x-2 border border-indigo-400/30"
+                className="w-full mt-2 bg-red-600 hover:bg-red-700 text-white font-black text-xs uppercase tracking-wider py-4 rounded-2xl shadow-xl shadow-red-600/30 transition-all active:scale-95 flex items-center justify-center space-x-2 border border-red-400/30"
               >
                 {authLoading ? (
                   <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
                 ) : (
                   <>
-                    <span>{isLoginMode ? "Sign In Now" : "Complete Registration"}</span>
+                    <span>Ingia Sasa</span>
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
@@ -254,7 +251,7 @@ export default function Home() {
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex flex-col items-center justify-center relative overflow-hidden">
-        <div className="w-20 h-20 border-4 border-indigo-600/20 border-t-indigo-600 rounded-full animate-spin"></div>
+        <div className="w-20 h-20 border-4 border-red-600/20 border-t-red-600 rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -262,16 +259,16 @@ export default function Home() {
   const heroChannel = selectedChannel || categories[0]?.channels[0];
 
   return (
-    <div className="min-h-screen bg-black text-white p-4 pb-36 space-y-6 font-sans selection:bg-indigo-600 selection:text-white">
+    <div className="min-h-screen bg-black text-white p-4 pb-36 space-y-6 font-sans selection:bg-red-600 selection:text-white">
       
       {/* Top Header */}
       <div className="flex items-center justify-between pt-1">
         <div className="flex items-center space-x-3">
-          <div className="w-11 h-11 bg-gradient-to-tr from-indigo-600 to-cyan-500 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-600/30 border border-indigo-400/30">
+          <div className="w-11 h-11 bg-red-600 rounded-2xl flex items-center justify-center shadow-lg shadow-red-600/30 border border-red-400/30">
             <Tv className="w-5.5 h-5.5 text-white" />
           </div>
           <div>
-            <span className="font-black text-lg tracking-wider bg-gradient-to-r from-white via-zinc-200 to-indigo-300 bg-clip-text text-transparent">
+            <span className="font-black text-lg tracking-wider bg-gradient-to-r from-white via-zinc-200 to-red-300 bg-clip-text text-transparent">
               TECHSTREAM
             </span>
             <p className="text-[10px] text-zinc-400 font-semibold tracking-wider">Pro IPTV ({appLanguage})</p>
@@ -284,7 +281,7 @@ export default function Home() {
             className="w-10 h-10 rounded-2xl bg-zinc-900/85 border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white transition-all relative shadow-md"
           >
             <Bell className="w-4.5 h-4.5" />
-            <span className="absolute top-2 right-2 w-2 h-2 bg-indigo-500 rounded-full animate-ping"></span>
+            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-ping"></span>
           </button>
           
           <button 
@@ -302,12 +299,12 @@ export default function Home() {
         <div className="space-y-6 pt-2 animate-fadeIn">
           <div className="bg-zinc-900/90 border border-zinc-800 rounded-3xl p-6 space-y-4 shadow-xl">
             <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 bg-gradient-to-tr from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-indigo-600/40">
+              <div className="w-16 h-16 bg-red-600 rounded-2xl flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-red-600/40">
                 {user.charAt(0).toUpperCase()}
               </div>
               <div className="overflow-hidden">
                 <h2 className="text-base font-black text-white truncate">{user}</h2>
-                <p className="text-xs text-indigo-400 font-medium flex items-center space-x-1 mt-0.5">
+                <p className="text-xs text-red-400 font-medium flex items-center space-x-1 mt-0.5">
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>VIP Member Active</span>
                 </p>
@@ -321,7 +318,7 @@ export default function Home() {
               </div>
               <div className="bg-zinc-950 p-3.5 rounded-2xl border border-zinc-800/80">
                 <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">Language</span>
-                <p className="text-lg font-black text-indigo-400 mt-0.5">{appLanguage}</p>
+                <p className="text-lg font-black text-red-400 mt-0.5">{appLanguage}</p>
               </div>
             </div>
           </div>
@@ -329,7 +326,7 @@ export default function Home() {
           {/* LANGUAGE SELECTOR */}
           <div className="bg-zinc-900/90 border border-zinc-800 rounded-3xl p-5 space-y-3">
             <h3 className="text-xs font-black uppercase tracking-wider text-zinc-300 flex items-center space-x-2">
-              <Globe className="w-4 h-4 text-indigo-400" />
+              <Globe className="w-4 h-4 text-red-400" />
               <span>Select App Language</span>
             </h3>
             <div className="grid grid-cols-3 gap-2.5">
@@ -337,7 +334,7 @@ export default function Home() {
                 <button
                   key={lang}
                   onClick={() => changeLanguage(lang)}
-                  className={`py-3 text-xs font-bold rounded-2xl border transition-all ${appLanguage === lang ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-600/30' : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-white'}`}
+                  className={`py-3 text-xs font-bold rounded-2xl border transition-all ${appLanguage === lang ? 'bg-red-600 border-red-500 text-white shadow-lg shadow-red-600/30' : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-white'}`}
                 >
                   {lang}
                 </button>
@@ -352,7 +349,7 @@ export default function Home() {
               className="w-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-white font-bold text-xs py-4 px-5 rounded-2xl flex items-center justify-between transition-all"
             >
               <div className="flex items-center space-x-3">
-                <Settings className="w-4 h-4 text-indigo-400" />
+                <Settings className="w-4 h-4 text-red-400" />
                 <span>App Settings & Preferences</span>
               </div>
               <ArrowRight className="w-4 h-4 text-zinc-500" />
@@ -380,7 +377,7 @@ export default function Home() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search any channel..."
-              className="w-full bg-zinc-900/80 backdrop-blur-xl border border-zinc-800/90 rounded-2xl pl-11 pr-4 py-3.5 text-xs text-white focus:outline-none focus:border-indigo-500 transition-all placeholder:text-zinc-500 shadow-inner"
+              className="w-full bg-zinc-900/80 backdrop-blur-xl border border-zinc-800/90 rounded-2xl pl-11 pr-4 py-3.5 text-xs text-white focus:outline-none focus:border-red-500 transition-all placeholder:text-zinc-500 shadow-inner"
             />
           </div>
 
@@ -389,7 +386,7 @@ export default function Home() {
             <div className="sticky top-2 z-30 bg-zinc-950/95 backdrop-blur-2xl border border-zinc-800/90 rounded-3xl p-3 shadow-2xl space-y-2.5">
               <div className="flex items-center justify-between px-1">
                 <div className="flex items-center space-x-2.5 overflow-hidden">
-                  <span className="w-2.5 h-2.5 bg-indigo-500 rounded-full animate-ping flex-shrink-0"></span>
+                  <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-ping flex-shrink-0"></span>
                   <h2 className="text-xs font-black text-white truncate tracking-wide">
                     {cleanName(heroChannel.name)}
                   </h2>
@@ -425,7 +422,7 @@ export default function Home() {
                 <div key={cat.name} className="space-y-3">
                   <div className="flex items-center justify-between px-1">
                     <h3 className="text-xs font-black uppercase tracking-wider text-zinc-200 flex items-center space-x-2">
-                      <Radio className="w-3.5 h-3.5 text-indigo-400" />
+                      <Radio className="w-3.5 h-3.5 text-red-400" />
                       <span>{cat.name}</span>
                     </h3>
                     <span className="text-[10px] text-zinc-400 font-bold bg-zinc-900 px-2.5 py-1 rounded-full border border-zinc-800">
@@ -444,7 +441,7 @@ export default function Home() {
                           key={ch.id}
                           onClick={() => setSelectedChannel(ch)}
                           className={`min-w-[160px] max-w-[160px] bg-gradient-to-b from-zinc-900/90 to-zinc-950/95 backdrop-blur-xl border rounded-2xl p-3.5 flex flex-col justify-between cursor-pointer transition-all active:scale-95 flex-shrink-0 shadow-xl ${
-                            isSelected ? "border-indigo-500 bg-indigo-950/30 ring-1 ring-indigo-500/60" : "border-zinc-800/80 hover:border-zinc-700"
+                            isSelected ? "border-red-500 bg-red-950/30 ring-1 ring-red-500/60" : "border-zinc-800/80 hover:border-zinc-700"
                           }`}
                         >
                           <div className="flex items-center justify-between mb-4">
@@ -452,7 +449,7 @@ export default function Home() {
                               {ch.logo ? (
                                 <img src={ch.logo} alt="" className="w-full h-full object-contain" />
                               ) : (
-                                <Tv className="w-5 h-5 text-indigo-400" />
+                                <Tv className="w-5 h-5 text-red-400" />
                               )}
                             </div>
                             <button onClick={(e) => toggleFavorite(ch.id, e)} className="text-zinc-500 hover:text-red-500 p-1">
@@ -481,7 +478,7 @@ export default function Home() {
           <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 max-w-sm w-full space-y-4 shadow-2xl relative">
             <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
               <div className="flex items-center space-x-2">
-                <Bell className="w-5 h-5 text-indigo-400" />
+                <Bell className="w-5 h-5 text-red-400" />
                 <h3 className="font-extrabold text-sm text-white">Notifications</h3>
               </div>
               <button onClick={() => setShowNotifications(false)} className="text-zinc-400 hover:text-white bg-zinc-800 p-1.5 rounded-full">
@@ -501,7 +498,7 @@ export default function Home() {
               ))}
             </div>
 
-            <button onClick={() => setShowNotifications(false)} className="w-full bg-indigo-600 text-white text-xs font-bold py-3 rounded-2xl shadow-lg">
+            <button onClick={() => setShowNotifications(false)} className="w-full bg-red-600 text-white text-xs font-bold py-3 rounded-2xl shadow-lg">
               Close
             </button>
           </div>
@@ -512,15 +509,15 @@ export default function Home() {
       <nav className="fixed bottom-0 left-0 right-0 bg-zinc-950/95 backdrop-blur-xl border-t border-zinc-800/80 px-4 py-3 flex justify-around items-center z-40 shadow-2xl">
         <button
           onClick={() => setActiveTab("mwanzo")}
-          className={`flex flex-col items-center space-y-1 transition-colors ${activeTab === "mwanzo" ? "text-indigo-400 font-bold" : "text-zinc-500 hover:text-zinc-300"}`}
+          className={`flex flex-col items-center space-y-1 transition-colors ${activeTab === "mwanzo" ? "text-red-500 font-bold" : "text-zinc-500 hover:text-zinc-300"}`}
         >
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-          <span className="text-[10px]">Home</span>
+          <span className="text-[10px]">Mwanzo</span>
         </button>
 
         <button
           onClick={() => setActiveTab("movies")}
-          className={`flex flex-col items-center space-y-1 transition-colors ${activeTab === "movies" ? "text-indigo-400 font-bold" : "text-zinc-500 hover:text-zinc-300"}`}
+          className={`flex flex-col items-center space-y-1 transition-colors ${activeTab === "movies" ? "text-red-500 font-bold" : "text-zinc-500 hover:text-zinc-300"}`}
         >
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/></svg>
           <span className="text-[10px]">Movies</span>
@@ -528,7 +525,7 @@ export default function Home() {
 
         <button
           onClick={() => setActiveTab("series")}
-          className={`flex flex-col items-center space-y-1 transition-colors ${activeTab === "series" ? "text-indigo-400 font-bold" : "text-zinc-500 hover:text-zinc-300"}`}
+          className={`flex flex-col items-center space-y-1 transition-colors ${activeTab === "series" ? "text-red-500 font-bold" : "text-zinc-500 hover:text-zinc-300"}`}
         >
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/></svg>
           <span className="text-[10px]">Series</span>
@@ -536,7 +533,7 @@ export default function Home() {
 
         <button
           onClick={() => setActiveTab("livetv")}
-          className={`flex flex-col items-center space-y-1 transition-colors ${activeTab === "livetv" ? "text-indigo-400 font-bold" : "text-zinc-500 hover:text-zinc-300"}`}
+          className={`flex flex-col items-center space-y-1 transition-colors ${activeTab === "livetv" ? "text-red-500 font-bold" : "text-zinc-500 hover:text-zinc-300"}`}
         >
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12zM8 15h2v-2H8v2zm3 0h2v-2h-2v2zm3 0h2v-2h-2v2z"/></svg>
           <span className="text-[10px]">Live TV</span>
@@ -544,7 +541,7 @@ export default function Home() {
 
         <button
           onClick={() => setActiveTab("profile")}
-          className={`flex flex-col items-center space-y-1 transition-colors ${activeTab === "profile" ? "text-indigo-400 font-bold" : "text-zinc-500 hover:text-zinc-300"}`}
+          className={`flex flex-col items-center space-y-1 transition-colors ${activeTab === "profile" ? "text-red-500 font-bold" : "text-zinc-500 hover:text-zinc-300"}`}
         >
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
           <span className="text-[10px]">Profile</span>
