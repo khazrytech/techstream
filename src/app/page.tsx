@@ -1,14 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { 
-  Search, Heart, Play, Bell, User, Tv, ShieldCheck, Flame, Radio, X, Lock, Mail, ArrowRight, Globe, LogOut, Settings, Download, Film, Sparkles, CheckCircle2 
+  Search, Heart, Play, Bell, User, Tv, ShieldCheck, Flame, Radio, X, Lock, Mail, ArrowRight, Globe, LogOut, Settings, Sparkles, CheckCircle2 
 } from "lucide-react";
-import { createClient } from "@supabase/supabase-js";
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://fqixivwmtggpuftrnxxq.supabase.co";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxaXhpdndtdGdncHVmdHJueHhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk4OTU2NDIsImV4cCI6MjEwNTQ3MTY0Mn0.6p1CLy1YF_miQSSEK2JsGxS-EqnLQxLfmZB6boZmRWQ";
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 interface Channel {
   id: string;
@@ -133,49 +127,11 @@ export default function Home() {
     }
     setAuthLoading(true);
 
-    try {
-      if (isLoginMode) {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) {
-          if (password.length >= 4) {
-            localStorage.setItem("techstream_user", email);
-            setUser(email);
-          } else {
-            setAuthError(error.message);
-          }
-        } else if (data.user) {
-          localStorage.setItem("techstream_user", data.user.email || email);
-          setUser(data.user.email || email);
-        }
-      } else {
-        const { data, error } = await supabase.auth.signUp({ email, password });
-        if (error) {
-          setAuthError(error.message);
-        } else {
-          localStorage.setItem("techstream_user", email);
-          setUser(email);
-        }
-      }
-    } catch (err: any) {
+    setTimeout(() => {
       localStorage.setItem("techstream_user", email);
       setUser(email);
-    } finally {
       setAuthLoading(false);
-    }
-  };
-
-  const handleGoogleAuth = async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: { redirectTo: window.location.origin }
-      });
-      if (error) {
-        setAuthError("Google Login error: " + error.message);
-      }
-    } catch (err) {
-      setAuthError("Failed to connect with Google OAuth.");
-    }
+    }, 600);
   };
 
   const handleLogout = () => {
@@ -195,7 +151,7 @@ export default function Home() {
     localStorage.setItem("techstream_lang", lang);
   };
 
-  // =================== LOGIN / SIGNUP VIEW (NO NAVIGATION AT ALL) ===================
+  // =================== LOGIN / SIGNUP VIEW (ZERO NAVIGATION BAR) ===================
   if (!user) {
     return (
       <div className="min-h-screen bg-zinc-950 text-white flex flex-col justify-center px-6 py-12 relative overflow-hidden font-sans selection:bg-indigo-600 selection:text-white">
@@ -206,7 +162,7 @@ export default function Home() {
         <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10 space-y-6">
           <div className="text-center space-y-3">
             <div className="inline-flex w-16 h-16 bg-gradient-to-tr from-indigo-600 via-purple-600 to-cyan-500 rounded-3xl items-center justify-center shadow-2xl shadow-indigo-500/40 border border-indigo-400/30">
-              <Sparkles className="w-8 h-8 text-white animate-spin duration-3000" />
+              <Sparkles className="w-8 h-8 text-white" />
             </div>
             <div>
               <h1 className="text-2xl font-black tracking-wider bg-gradient-to-r from-white via-zinc-200 to-indigo-300 bg-clip-text text-transparent">
@@ -243,22 +199,6 @@ export default function Home() {
                 {authError}
               </div>
             )}
-
-            {/* Google OAuth Button */}
-            <button
-              type="button"
-              onClick={handleGoogleAuth}
-              className="w-full bg-white hover:bg-zinc-100 text-black font-extrabold text-xs uppercase tracking-wider py-3.5 rounded-2xl shadow-xl transition-all active:scale-95 flex items-center justify-center space-x-3 border border-zinc-200"
-            >
-              <Globe className="w-4 h-4 text-indigo-600" />
-              <span>Continue with Google</span>
-            </button>
-
-            <div className="flex items-center space-x-3">
-              <div className="flex-1 h-px bg-zinc-800"></div>
-              <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest">OR USE EMAIL</span>
-              <div className="flex-1 h-px bg-zinc-800"></div>
-            </div>
 
             <form onSubmit={handleAuthSubmit} className="space-y-4">
               <div className="space-y-1.5">
@@ -357,7 +297,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* TAB CONTENT: HOME / MOVIES / SERIES / LIVE TV / PROFILE */}
+      {/* TAB CONTENT: PROFILE OR HOME CHANNELS */}
       {activeTab === "profile" ? (
         <div className="space-y-6 pt-2 animate-fadeIn">
           <div className="bg-zinc-900/90 border border-zinc-800 rounded-3xl p-6 space-y-4 shadow-xl">
