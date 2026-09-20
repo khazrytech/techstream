@@ -1,9 +1,16 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "TechStream Pro",
-  description: "Next-gen IPTV streaming platform",
+  description: "Next-gen Live IPTV Streaming Platform",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({
@@ -13,7 +20,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-black text-white antialiased selection:bg-red-600 selection:text-white">
+      <body className="bg-black text-white antialiased touch-manipulation select-none overflow-x-hidden">
         {children}
       </body>
     </html>
