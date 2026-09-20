@@ -1,39 +1,37 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { Mail, Lock, Eye, EyeOff, Play, ShieldCheck, ArrowRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Tv, Mail, Lock, KeyRound, ArrowRight, CheckCircle2, AlertCircle } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [step, setStep] = useState<"auth" | "otp">("auth");
   const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
-  const [successMsg, setSuccessMsg] = useState("");
+  const [message, setMessage] = useState<{ type: "error" | "success"; text: string } | null>(null);
 
+  // Hatua ya 1: Kutuma Maombi ya Usajili / Kuingia
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setErrorMsg("");
-    setSuccessMsg("");
+    setMessage(null);
 
     try {
       if (isSignUp) {
-        const { data, error } = await supabase.auth.signUp({
+        const { error } = await supabase.auth.signUp({
           email,
           password,
         });
 
         if (error) throw error;
 
-        if (data.user) {
-          setSuccessMsg("Akaunti imetengenezwa! Sasa unaweza kuingia.");
-          setIsSignUp(false);
-        }
+        setMessage({ type: "success", text: "Kodi ya OTP imetumwa kwenye barua pepe yako!" });
+        setStep("otp");
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
@@ -42,140 +40,195 @@ export default function LoginPage() {
 
         if (error) throw error;
 
-        setSuccessMsg("Umefanikiwa kuingia! Inakuhamisha...");
-        setTimeout(() => {
-          router.push("/");
-        }, 1000);
+        setMessage({ type: "success", text: "Umeingia kikamilifu!" });
+        router.push("/");
       }
     } catch (err: any) {
-      setErrorMsg(err.message || "Kuna tatizo limetokea. Jaribu tena.");
+      setMessage({ type: "error", text: err.message || "Kuna hitilafu imetokea!" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Hatua ya 2: Kuthibitisha Kodi ya OTP
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage(null);
+
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        email,
+        token: otpCode.trim(),
+        type: isSignUp ? "signup" : "email",
+      });
+
+      if (error) throw error;
+
+      setMessage({ type: "success", text: "Uthibitisho umefanikiwa! Unaelekewa kwenye app..." });
+      setTimeout(() => {
+        router.push("/");
+      }, 1200);
+    } catch (err: any) {
+      setMessage({ type: "error", text: err.message || "Kodi ya OTP siyo sahihi au imeisha muda wake!" });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white flex flex-col justify-center items-center px-4 relative overflow-hidden select-none">
-      {/* Background Lighting Effects */}
-      <div className="absolute -top-32 -left-32 w-80 h-80 bg-red-600/20 rounded-full blur-[120px] pointer-events-none"></div>
-      <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-red-900/20 rounded-full blur-[120px] pointer-events-none"></div>
+    <div className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center p-4 selection:bg-red-600 selection:text-white relative overflow-hidden">
+      {/* Background Glow */}
+      <div className="absolute w-80 h-80 bg-red-600/15 rounded-full blur-[120px] pointer-events-none"></div>
 
-      <div className="w-full max-w-md z-10 space-y-6">
-        {/* Logo & Branding Header */}
+      <div className="w-full max-w-sm bg-zinc-950/90 border border-zinc-800/80 p-6 rounded-3xl shadow-2xl backdrop-blur-xl relative z-10 space-y-6">
+        
+        {/* LOGO & TITLE */}
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-tr from-red-700 to-red-500 rounded-2xl shadow-xl shadow-red-600/30 mb-2 border border-red-400/20">
-            <Play className="w-8 h-8 text-white fill-current translate-x-0.5" />
+          <div className="w-14 h-14 bg-gradient-to-tr from-red-700 via-red-600 to-rose-500 rounded-2xl flex items-center justify-center shadow-lg shadow-red-600/40 border border-red-400/30 mx-auto">
+            <Tv className="w-7 h-7 text-white" />
           </div>
-          <h1 className="text-2xl font-black tracking-tight bg-gradient-to-r from-white via-neutral-200 to-red-500 bg-clip-text text-transparent">
-            TechStream
-          </h1>
-          <p className="text-xs text-neutral-400 font-medium">
-            {isSignUp ? "Tengeneza akaunti mpya kuanza kuangalia Live TV" : "Ingia ili kuendelea na vipindi vyako unavyopenda"}
-          </p>
+          <h1 className="text-xl font-black tracking-tight text-white">TechStream</h1>
+          <p className="text-xs text-zinc-400 font-medium">Anza safari yako hapa</p>
         </div>
 
-        {/* Form Container */}
-        <div className="bg-neutral-900/80 backdrop-blur-2xl border border-neutral-800/90 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
-          {/* Tab Switcher */}
-          <div className="grid grid-cols-2 p-1 bg-neutral-950/80 rounded-2xl border border-neutral-800/60">
-            <button
-              type="button"
-              onClick={() => { setIsSignUp(false); setErrorMsg(""); setSuccessMsg(""); }}
-              className={`py-2 text-xs font-bold rounded-xl transition-all duration-300 ${
-                !isSignUp ? "bg-red-600 text-white shadow-lg shadow-red-600/30" : "text-neutral-400 hover:text-white"
-              }`}
-            >
-              Ingia
-            </button>
-            <button
-              type="button"
-              onClick={() => { setIsSignUp(true); setErrorMsg(""); setSuccessMsg(""); }}
-              className={`py-2 text-xs font-bold rounded-xl transition-all duration-300 ${
-                isSignUp ? "bg-red-600 text-white shadow-lg shadow-red-600/30" : "text-neutral-400 hover:text-white"
-              }`}
-            >
-              Tengeneza Akaunti
-            </button>
+        {/* NOTIFICATION MESSAGES */}
+        {message && (
+          <div
+            className={`p-3.5 rounded-2xl border text-xs flex items-center space-x-2.5 ${
+              message.type === "error"
+                ? "bg-red-950/40 border-red-800/80 text-red-400"
+                : "bg-emerald-950/40 border-emerald-800/80 text-emerald-400"
+            }`}
+          >
+            {message.type === "error" ? (
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            ) : (
+              <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+            )}
+            <span className="font-medium">{message.text}</span>
           </div>
+        )}
 
-          {/* Feedback Messages */}
-          {errorMsg && (
-            <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-xs px-4 py-3 rounded-xl flex items-center space-x-2 animate-shake">
-              <span>⚠️</span>
-              <span>{errorMsg}</span>
-            </div>
-          )}
-
-          {successMsg && (
-            <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs px-4 py-3 rounded-xl flex items-center space-x-2">
-              <span>✅</span>
-              <span>{successMsg}</span>
-            </div>
-          )}
-
+        {/* HATUA YA 1: EMAIL & PASSWORD */}
+        {step === "auth" ? (
           <form onSubmit={handleAuth} className="space-y-4">
-            {/* Email Field */}
-            <div className="space-y-1.5">
-              <label className="text-[11px] font-bold text-neutral-300">Barua Pepe (Email)</label>
+            {/* SWITCH TABS (INGIA / JISAJILI) */}
+            <div className="grid grid-cols-2 p-1 bg-zinc-900 border border-zinc-800 rounded-xl text-xs font-bold">
+              <button
+                type="button"
+                onClick={() => setIsSignUp(false)}
+                className={`py-2 rounded-lg transition-all ${
+                  !isSignUp ? "bg-zinc-800 text-white shadow" : "text-zinc-500 hover:text-zinc-300"
+                }`}
+              >
+                Ingia
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsSignUp(true)}
+                className={`py-2 rounded-lg transition-all ${
+                  isSignUp ? "bg-red-600 text-white shadow-lg shadow-red-600/30" : "text-zinc-500 hover:text-zinc-300"
+                }`}
+              >
+                Jisajili
+              </button>
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">
+                Barua Pepe
+              </label>
               <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="jina@email.com"
-                  className="w-full bg-neutral-950/70 border border-neutral-800 text-xs text-white pl-10 pr-4 py-3 rounded-xl focus:outline-none focus:border-red-600 transition-all shadow-inner"
+                  placeholder="mfano@gmail.com"
+                  className="w-full bg-zinc-900/90 border border-zinc-800 text-xs text-white pl-10 pr-4 py-3 rounded-xl focus:outline-none focus:border-red-600 transition-all placeholder:text-zinc-600"
                 />
               </div>
             </div>
 
-            {/* Password Field */}
-            <div className="space-y-1.5">
-              <label className="text-[11px] font-bold text-neutral-300">Neno la Siri (Password)</label>
+            <div>
+              <label className="block text-[11px] font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">
+                Neno la Siri
+              </label>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                 <input
-                  type={showPassword ? "text" : "password"}
+                  type="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-neutral-950/70 border border-neutral-800 text-xs text-white pl-10 pr-10 py-3 rounded-xl focus:outline-none focus:border-red-600 transition-all shadow-inner"
+                  className="w-full bg-zinc-900/90 border border-zinc-800 text-xs text-white pl-10 pr-4 py-3 rounded-xl focus:outline-none focus:border-red-600 transition-all placeholder:text-zinc-600"
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
               </div>
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white text-xs font-extrabold py-3.5 rounded-xl transition-all shadow-xl shadow-red-600/30 flex items-center justify-center space-x-2 disabled:opacity-50 active:scale-95 mt-2"
+              className="w-full bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 text-white font-black text-xs uppercase tracking-widest py-3.5 rounded-xl shadow-lg shadow-red-600/30 transition-all active:scale-95 flex items-center justify-center space-x-2 disabled:opacity-50"
             >
               {loading ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <span>Inasindika...</span>
               ) : (
                 <>
-                  <span>{isSignUp ? "Kamilisha Usajili" : "Ingia Sasa"}</span>
+                  <span>{isSignUp ? "Jisajili Sasa" : "Ingia Sasa"}</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
             </button>
           </form>
+        ) : (
+          /* HATUA YA 2: INGIZA KODI YA OTP */
+          <form onSubmit={handleVerifyOtp} className="space-y-4">
+            <div className="text-center space-y-1">
+              <p className="text-xs text-zinc-300">
+                Tumeutuma kodi ya tarakimu 6 kwenda:
+              </p>
+              <p className="text-xs font-bold text-red-400 truncate">{email}</p>
+            </div>
 
-          {/* Security Badge */}
-          <div className="pt-2 border-t border-neutral-800/60 flex items-center justify-center space-x-1.5 text-neutral-500 text-[10px]">
-            <ShieldCheck className="w-3.5 h-3.5 text-red-500" />
-            <span>Mfumo wa ulinzi wa Supabase Encryption</span>
-          </div>
-        </div>
+            <div>
+              <label className="block text-[11px] font-bold text-zinc-400 mb-1.5 uppercase tracking-wider text-center">
+                Ingiza Kodi ya OTP
+              </label>
+              <div className="relative">
+                <KeyRound className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                <input
+                  type="text"
+                  required
+                  maxLength={6}
+                  value={otpCode}
+                  onChange={(e) => setOtpCode(e.target.value)}
+                  placeholder="123456"
+                  className="w-full bg-zinc-900/90 border border-zinc-800 text-center text-lg tracking-[8px] font-black text-white pl-10 pr-4 py-3 rounded-xl focus:outline-none focus:border-red-600 transition-all placeholder:text-zinc-700 placeholder:tracking-normal placeholder:font-normal placeholder:text-xs"
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 text-white font-black text-xs uppercase tracking-widest py-3.5 rounded-xl shadow-lg shadow-red-600/30 transition-all active:scale-95 flex items-center justify-center space-x-2 disabled:opacity-50"
+            >
+              {loading ? <span>Inathibitisha...</span> : <span>Thibitisha OTP</span>}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setStep("auth")}
+              className="w-full text-zinc-500 hover:text-zinc-300 text-xs text-center font-bold pt-2 block"
+            >
+              ← Rudi Nyuma
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );
