@@ -1,41 +1,63 @@
 import { NextResponse } from "next/server";
-import { parseM3U } from "@/lib/iptv-parser";
+import { createClient } from "@supabase/supabase-js";
 
-// Orodha ya playlists zinazobeba chaneli za kimataifa, michezo, filamu na za nyumbani
-const IPTV_URLS = [
-  "https://iptv-org.github.io/iptv/countries/tz.m3u",
-  "https://iptv-org.github.io/iptv/languages/swa.m3u",
-  "https://iptv-org.github.io/iptv/categories/sports.m3u",
-  "https://iptv-org.github.io/iptv/categories/movies.m3u",
-  "https://iptv-org.github.io/iptv/categories/entertainment.m3u",
-  "https://iptv-org.github.io/iptv/categories/music.m3u",
-  "https://iptv-org.github.io/iptv/categories/news.m3u",
-  "https://iptv-org.github.io/iptv/categories/kids.m3u",
-  "https://iptv-org.github.io/iptv/categories/documentary.m3u"
-];
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    // Tunavuta playlists zote kwa wakati mmoja ili kuokoa muda
-    const fetchPromises = IPTV_URLS.map(url => 
-      fetch(url, { next: { revalidate: 3600 } })
-        .then(res => res.ok ? res.text() : "")
-        .catch(() => "")
-    );
-    
-    const results = await Promise.all(fetchPromises);
-    
-    // Tunaunganisha chaneli zote kwenye faili moja kubwa la M3U
-    const combinedM3uText = results.join("\n");
+    const { searchParams } = new URL(request.url);
+    const categoryFilter = searchParams.get("category");
+    const countryFilter = searchParams.get("country");
+    const search = searchParams.get("search");
 
-    if (!combinedM3uText.includes("#EXTINF")) {
-      return NextResponse.json({ success: false, error: "Hakuna chaneli iliyopatikana" }, { status: 500 });
+    let query = supabase.from("channels").select(`
+      *,
+      channel_backups (*)
+    `);
+
+    if (categoryFilter && categoryFilter !== "All") {
+      query = query.eq("category", categoryFilter);
     }
 
-    const categories = parseM3U(combinedM3uText);
-    
-    return NextResponse.json({ success: true, categories });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    if (countryFilter && countryFilter !== "All") {
+      query = query.eq("country", countryFilter);
+    }
+
+    if (search) {
+      query = query.ilike("name", `%${search}%`);
+    }
+
+    const { data: channels, error } = await query.order("priority", { ascending: false }).limit(100);
+
+    if (error) {
+      return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    }
+
+    // Dynamic Category Grouping
+    const categoriesMap: Record<string, any[]> = {};
+
+    channels?.forEach((ch) => {
+      const cat = ch.category || "General";
+      if (!categoriesMap[cat]) {
+        categoriesMap[cat] = [];
+      }
+      categoriesMap[cat].push(ch);
+    });
+
+    const categoryGroups = Object.keys(categoriesMap).map((catName) => ({
+      name: catName,
+      channels: categoriesMap[catName],
+    }));
+
+    return NextResponse.json({
+      success: true,
+      totalChannels: channels?.length || 0,
+      categories: categoryGroups,
+      channels: channels || [],
+    });
+  } catch (err: any) {
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }
