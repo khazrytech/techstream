@@ -1,57 +1,50 @@
-export interface Channel {
-  id: string;
-  name: string;
-  logo: string;
-  group: string;
-  url: string;
-}
+import { IPTVChannel } from "@/types/techstream";
 
-export interface CategoryGroup {
-  category: string;
-  channels: Channel[];
-}
-
-export function parseM3U(m3uContent: string): CategoryGroup[] {
-  const lines = m3uContent.split(/\r?\n/);
-  const channels: Channel[] = [];
-  let currentChannel: Partial<Channel> = {};
+export function parseM3UPlaylist(m3uContent: string): IPTVChannel[] {
+  const lines = m3uContent.split("\n");
+  const channels: IPTVChannel[] = [];
+  let currentChannel: Partial<IPTVChannel> = {};
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
+
     if (line.startsWith("#EXTINF:")) {
-      currentChannel = {};
-      
-      const logoMatch = line.match(/tvg-logo="([^"]*)"/);
-      if (logoMatch) currentChannel.logo = logoMatch[1];
-
+      const tvgIdMatch = line.match(/tvg-id="([^"]*)"/);
+      const tvgLogoMatch = line.match(/tvg-logo="([^"]*)"/);
       const groupMatch = line.match(/group-title="([^"]*)"/);
-      currentChannel.group = groupMatch ? groupMatch[1] : "General";
+      const countryMatch = line.match(/tvg-country="([^"]*)"/);
 
-      const commaIndex = line.lastIndexOf(",");
-      if (commaIndex !== -1) {
-        currentChannel.name = line.substring(commaIndex + 1).trim();
-      }
-      currentChannel.id = Math.random().toString(36).substring(2, 9);
-    } else if (line && !line.startsWith("#")) {
+      const nameParts = line.split(",");
+      const channelName = nameParts[nameParts.length - 1]?.trim() || "Unknown Channel";
+
+      currentChannel = {
+        id: `chan_${Math.random().toString(36).substring(2, 9)}`,
+        name: channelName,
+        epgChannelId: tvgIdMatch ? tvgIdMatch[1] : undefined,
+        logoUrl: tvgLogoMatch ? tvgLogoMatch[1] : "",
+        category: groupMatch ? groupMatch[1] : "General",
+        country: countryMatch ? countryMatch[1] : "International",
+        quality: channelName.includes("4K") ? "4K" : channelName.includes("FHD") ? "FHD" : "HD",
+        isLive: true,
+        isFeatured: false,
+        status: "ONLINE",
+        backupStreamUrls: [],
+        activeStreamIndex: 0,
+      };
+    } else if (line.startsWith("http://") || line.startsWith("https://")) {
       if (currentChannel.name) {
-        currentChannel.url = line;
-        channels.push(currentChannel as Channel);
+        if (!currentChannel.primaryStreamUrl) {
+          currentChannel.primaryStreamUrl = line;
+          channels.push(currentChannel as IPTVChannel);
+        } else {
+          const lastChan = channels[channels.length - 1];
+          if (lastChan) {
+            lastChan.backupStreamUrls.push(line);
+          }
+        }
         currentChannel = {};
       }
     }
   }
-
-  const groupMap: { [key: string]: Channel[] } = {};
-  for (const ch of channels) {
-    const cat = ch.group || "General";
-    if (!groupMap[cat]) {
-      groupMap[cat] = [];
-    }
-    groupMap[cat].push(ch);
-  }
-
-  return Object.keys(groupMap).map((category) => ({
-    category,
-    channels: groupMap[category],
-  }));
+  return channels;
 }

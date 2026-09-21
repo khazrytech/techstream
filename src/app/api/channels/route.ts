@@ -1,89 +1,69 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
+import { IPTVChannel } from "@/types/techstream";
 
-export async function GET() {
-  try {
-    const response = await fetch('https://iptv-org.github.io/iptv/index.m3u', {
-      next: { revalidate: 3600 }
-    });
-    
-    if (!response.ok) {
-      throw new Error('Imeshindikana kupata chaneli za IPTV');
-    }
+const dummyChannels: IPTVChannel[] = [
+  {
+    id: "ch-1",
+    name: "Supersport Football HD",
+    streamUrl: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+    logoUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=100",
+    category: "Sports",
+    quality: "HD",
+    isLive: true,
+  },
+  {
+    id: "ch-2",
+    name: "TBC 1 Tanzania",
+    streamUrl: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+    logoUrl: "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=100",
+    category: "News",
+    quality: "SD",
+    isLive: true,
+  },
+  {
+    id: "ch-3",
+    name: "Azam Sports 1",
+    streamUrl: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+    logoUrl: "https://images.unsplash.com/photo-1518091043644-c1d4457512c6?w=100",
+    category: "Sports",
+    quality: "FHD",
+    isLive: true,
+  },
+  {
+    id: "ch-4",
+    name: "BBC World News",
+    streamUrl: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+    logoUrl: "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=100",
+    category: "News",
+    quality: "HD",
+    isLive: true,
+  },
+  {
+    id: "ch-5",
+    name: "Hollywood Action HD",
+    streamUrl: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+    logoUrl: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=100",
+    category: "Movies",
+    quality: "4K",
+    isLive: false,
+  },
+];
 
-    const m3uText = await response.text();
-    const lines = m3uText.split('\n');
-    
-    const channels: Array<{
-      id: string;
-      name: string;
-      logo: string;
-      category: string;
-      url: string;
-    }> = [];
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const q = searchParams.get("q")?.toLowerCase();
 
-    let currentChannel: any = {};
-
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
-      
-      if (line.startsWith('#EXTINF:')) {
-        currentChannel = {};
-        
-        const nameMatch = line.match(/,(.+)$/);
-        if (nameMatch) {
-          currentChannel.name = nameMatch[1].trim();
-        }
-
-        const logoMatch = line.match(/tvg-logo="([^"]+)"/);
-        if (logoMatch) {
-          currentChannel.logo = logoMatch[1];
-        }
-
-        const groupMatch = line.match(/group-title="([^"]+)"/);
-        if (groupMatch) {
-          currentChannel.category = groupMatch[1].trim();
-        } else {
-          currentChannel.category = 'General';
-        }
-      } else if (line && !line.startsWith('#')) {
-        currentChannel.url = line;
-        if (currentChannel.name && currentChannel.url) {
-          channels.push({
-            id: Math.random().toString(36).substring(2, 9),
-            name: currentChannel.name,
-            logo: currentChannel.logo || 'https://images.unsplash.com/photo-1593784991095-a205069470b6?q=80&w=200&auto=format&fit=crop',
-            category: currentChannel.category,
-            url: currentChannel.url
-          });
-        }
-      }
-    }
-
-    const validChannels = channels.filter(c => c.logo && c.url && !c.url.includes('.html'));
-
-    const categoriesMap: { [key: string]: typeof validChannels } = {};
-    
-    validChannels.forEach(channel => {
-      let cat = channel.category;
-      if (/sport/i.test(cat)) cat = 'Sports';
-      else if (/news/i.test(cat)) cat = 'News';
-      else if (/movie|film/i.test(cat)) cat = 'Movies';
-      else if (/kids|children|cartoon/i.test(cat)) cat = 'Kids';
-      else if (/music/i.test(cat)) cat = 'Music';
-      else if (/documentary|history|science/i.test(cat)) cat = 'Documentary';
-      else cat = 'General';
-
-      if (!categoriesMap[cat]) {
-        categoriesMap[cat] = [];
-      }
-      if (categoriesMap[cat].length < 30) {
-        categoriesMap[cat].push(channel);
-      }
-    });
-
-    return NextResponse.json({ success: true, categories: categoriesMap });
-  } catch (error) {
-    console.error('IPTV Fetch Error:', error);
-    return NextResponse.json({ success: false, error: 'Imeshindikana kupakia chaneli' }, { status: 500 });
+  let filtered = dummyChannels;
+  if (q) {
+    filtered = dummyChannels.filter(
+      (c) =>
+        c.name.toLowerCase().includes(q) ||
+        c.category.toLowerCase().includes(q)
+    );
   }
+
+  return NextResponse.json({
+    success: true,
+    channels: filtered,
+  });
 }
