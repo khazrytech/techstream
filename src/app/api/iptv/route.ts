@@ -1,60 +1,60 @@
 import { NextResponse } from "next/server";
+import fs from "fs";
+import path from "path";
 
-export const revalidate = 1800; // Cache kwa dakika 30
+export const revalidate = 1800;
 
 export async function GET() {
   try {
-    const iptvUrl = process.env.IPTV_M3U_URL || "";
-    
-    if (!iptvUrl) {
-      return NextResponse.json({ 
-        success: false, 
-        error: "Hakuna M3U_URL iliyowekwa kwenye .env au Vercel Environment Variables." 
-      }, { status: 400 });
-    }
+    const m3uUrl = process.env.IPTV_M3U_URL;
 
-    const res = await fetch(iptvUrl, { headers: { "User-Agent": "Mozilla/5.0" } });
-    if (!res.ok) throw new Error("Ameshindwa kupakua faili la M3U kutoka kwenye Seva.");
+    if (m3uUrl) {
+      const response = await fetch(m3uUrl, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+        },
+      });
 
-    const text = await res.text();
-    const lines = text.split("\n");
-
-    const categoriesMap: { [key: string]: any[] } = {};
-    let currentChannel: any = null;
-
-    for (let rawLine of lines) {
-      const line = rawLine.trim();
-      if (line.startsWith("#EXTINF:")) {
-        const nameMatch = line.match(/,(.+)$/);
-        const name = nameMatch ? nameMatch[1].trim() : "Channel";
-
-        const groupMatch = line.match(/group-title="([^"]+)"/i);
-        const group = groupMatch ? groupMatch[1].trim() : "Jumla (General)";
-
-        const logoMatch = line.match(/tvg-logo="([^"]+)"/i);
-        const logo = logoMatch ? logoMatch[1].trim() : "";
-
-        const idMatch = line.match(/tvg-id="([^"]+)"/i);
-        const id = idMatch ? idMatch[1].trim() : Math.random().toString(36).substring(7);
-
-        currentChannel = { id, name, group, logo, url: "" };
-      } else if (line && !line.startsWith("#") && currentChannel) {
-        currentChannel.url = line;
-        if (!categoriesMap[currentChannel.group]) {
-          categoriesMap[currentChannel.group] = [];
-        }
-        categoriesMap[currentChannel.group].push(currentChannel);
-        currentChannel = null;
+      if (!response.ok) {
+        return NextResponse.json(
+          { error: `Failed to fetch M3U playlist from URL. HTTP Status: ${response.status}` },
+          { status: response.status }
+        );
       }
+
+      const m3uData = await response.text();
+
+      return new NextResponse(m3uData, {
+        status: 200,
+        headers: {
+          "Content-Type": "application/x-mpegurl",
+          "Access-Control-Allow-Origin": "*",
+          "Cache-Control": "s-maxage=1800, stale-while-revalidate",
+        },
+      });
     }
 
-    const categories = Object.keys(categoriesMap).map((catName) => ({
-      name: catName,
-      channels: categoriesMap[catName],
-    }));
+    const filePath = path.join(process.cwd(), "playlist.m3u");
+    if (fs.existsSync(filePath)) {
+      const m3uData = fs.readFileSync(filePath, "utf-8");
+      return new NextResponse(m3uData, {
+        status: 200,
+        headers: {
+          "Content-Type": "application/x-mpegurl",
+          "Access-Control-Allow-Origin": "*",
+          "Cache-Control": "s-maxage=1800, stale-while-revalidate",
+        },
+      });
+    }
 
-    return NextResponse.json({ success: true, categories });
+    return NextResponse.json(
+      { error: "IPTV playlist source not configured. Set IPTV_M3U_URL in environment variables or provide playlist.m3u in root directory." },
+      { status: 404 }
+    );
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: error?.message || "Internal server error occurred while processing M3U playlist." },
+      { status: 500 }
+    );
   }
 }
