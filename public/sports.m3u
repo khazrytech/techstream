@@ -1,0 +1,124 @@
+#EXTINF:-1 tvg-id="ACCNetwork.us@SD",ACC Network (720p)
+http://23.239.31.26:8989/accnetwork/index.m3u8
+#EXTINF:-1 tvg-id="ACISportTV.it@SD",ACI Sport TV SD (1080p)
+https://webstream.multistream.it/memfs/e2cb3629-c1a2-495b-b43a-9eb386f04ed8.m3u8
+#EXTINF:-1 tvg-id="Adjarasport1.ge@SD",Adjarasport 1
+https://live20.bozztv.com/dvrfl05/gin-adjara/index.m3u8
+#EXTINF:-1 tvg-id="ADOTV.bj@SD",ADO TV (720p)
+https://strhls.streamakaci.tv/ortb/ortb2-multi/playlist.m3u8
+#EXTINF:-1 tvg-id="ESPN.us@SD",ESPN (720p)
+http://23.239.31.26:8989/espn/index.m3u8
+#EXTINF:-1 tvg-id="BeINsports.qa@SD",beIN SPORTS XTRA (1080p)
+https://live20.bozztv.com/dvrfl05/beinsports/index.m3u8
+#EXTINF:-1 tvg-id="NBATV.us@SD",NBA TV (720p)
+https://webstream.multistream.it/memfs/nbatv.m3u8
+#EXTINF:-1 tvg-id="RealMadridTV.es@SD",Real Madrid TV (1080p)
+https://strhls.streamakaci.tv/realmadrid/playlist.m3u8
+#EXTINF:-1 tvg-id="SkySportsMainEvent.uk@SD",Sky Sports Main Event (1080p)
+http://23.239.31.26:8989/skysports/index.m3u8
+#EXTINF:-1 tvg-id="Eurosport1.fr@SD",Eurosport 1 HD (720p)
+https://live20.bozztv.com/dvrfl05/eurosport1/index.m3u8
+#EXTINF:-1 tvg-id="FoxSports1.us@SD",Fox Sports 1 (720p)
+https://webstream.multistream.it/memfs/fs1.m3u8
+#EXTINF:-1 tvg-id="AzamSportsHD.tz@SD",Azam Sports HD (1080p)
+https://strhls.streamakaci.tv/azamsports/playlist.m3u8
+#EXTINF:-1 tvg-id="SuperSportPremierLeague.za@SD",SuperSport Premier League (1080p)
+http://23.239.31.26:8989/supersportpl/index.m3u8
+#EXTINF:-1 tvg-id="SuperSportLaLiga.za@SD",SuperSport LaLiga (1080p)
+https://live20.bozztv.com/dvrfl05/supersportlaliga/index.m3u8
+#EXTINF:-1 tvg-id="TNTSports1.uk@SD",TNT Sports 1 (1080p)
+https://webstream.multistream.it/memfs/tntsports1.m3u8
+#EXTINF:-1 tvg-id="TNTSports2.uk@SD",TNT Sports 2 (1080p)
+https://strhls.streamakaci.tv/tntsports2/playlist.m3u8
+#EXTINF:-1 tvg-id="SkySportsFootball.uk@SD",Sky Sports Football (720p)
+http://23.239.31.26:8989/skysportsfootball/index.m3u8
+#EXTINF:-1 tvg-id="BeINsports1FR.fr@SD",beIN Sports 1 France (1080p)
+https://live20.bozztv.com/dvrfl05/beinsports1fr/index.m3u8
+#EXTINF:-1 tvg-id="DAZN1.es@SD",DAZN 1 Spain (1080p)
+https://webstream.multistream.it/memfs/dazn1.m3u8
+#EXTINF:-1 tvg-id="TBC1.tz@SD",TBC 1 Tanzania (720p)
+https://strhls.streamakaci.tv/tbc1/playlist.m3u8
+#EXTINF:-1 tvg-id="AzamSports2.tz@SD",Azam Sports 2 HD (1080p)
+http://23.239.31.26:8989/azamsports2/index.m3u8
+#EXTINF:-1 tvg-id="WasafiTV.tz@SD",Wasafi TV (720p)
+https://live20.bozztv.com/dvrfl05/wasafitv/index.m3u8
+#EXTINF:-1 tvg-id="SuperSportVariety1.za@SD",SuperSport Variety 1 (1080p)
+http://23.239.31.26:8989/ssvariety1/index.m3u8
+#EXTINF:-1 tvg-id="ESPN2.us@SD",ESPN 2 (720p)
+https://live20.bozztv.com/dvrfl05/espn2/index.m3u8
+#EXTINF:-1 tvg-id="SkySportsCricket.uk@SD",Sky Sports Cricket (1080p)
+https://webstream.multistream.it/memfs/skysportscricket.m3u8
+#EXTINF:-1 tvg-id="TNTSports3.uk@SD",TNT Sports 3 (1080p)
+https://strhls.streamakaci.tv/tntsports3/playlist.m3u8
+#EXTINF:-1 tvg-id="CanalPlusSport1.fr@SD",Canal+ Sport 1 (1080p)
+http://23.239.31.26:8989/canalplussport1/index.m3u8
+#EXTINF:-1 tvg-id="ElevenSports1.pl@SD",Eleven Sports 1 (1080p)
+https://live20.bozztv.com/dvrfl05/elevensports1/index.m3u8
+#EXTINF:-1 tvg-id="ZBC.tz@SD",ZBC TV Zanzibar (720p)
+https://webstream.multistream.it/memfs/zbc.m3u8
+#EXTINF:-1 tvg-id="AzamSports3.tz@SD",Azam Sports 3 HD (1080p)
+https://strhls.streamakaci.tv/azamsports3/playlist.m3u8
+#EXTINF:-1 tvg-id="StarTV.tz@SD",Star TV Tanzania (720p)
+http://23.239.31.26:8989/startv/index.m3u8
+#EXTINF:-1 tvg-id="EATV.tz@SD",East Africa Television - EATV (720p)
+https://live20.bozztv.com/dvrfl05/eatv/index.m3u8
+#EXTINF:-1 tvg-id="SkySportsF1.uk@SD",Sky Sports F1 (1080p)
+http://23.239.31.26:8989/skysportsf1/index.m3u8
+#EXTINF:-1 tvg-id="GolfChannel.us@SD",Golf Channel HD (720p)
+https://live20.bozztv.com/dvrfl05/golfchannel/index.m3u8
+#EXTINF:-1 tvg-id="WWENetwork.us@SD",WWE Network (1080p)
+https://webstream.multistream.it/memfs/wwenetwork.m3u8
+#EXTINF:-1 tvg-id="ITV.tz@SD",ITV Tanzania (720p)
+https://strhls.streamakaci.tv/itv/playlist.m3u8
+#EXTINF:-1 tvg-id="CloudsTV.tz@SD",Clouds TV Tanzania (720p)
+http://23.239.31.26:8989/cloudstv/index.m3u8
+#EXTINF:-1 tvg-id="ChannelTen.tz@SD",Channel Ten (720p)
+https://live20.bozztv.com/dvrfl05/channelten/index.m3u8
+#EXTINF:-1 tvg-id="TV1.tz@SD",TV1 Tanzania (720p)
+https://webstream.multistream.it/memfs/tv1tz.m3u8
+#EXTINF:-1 tvg-id="AzamNews.tz@SD",Azam News (1080p)
+https://strhls.streamakaci.tv/azamnews/playlist.m3u8
+#EXTINF:-1 tvg-id="SuperSportAction.za@SD",SuperSport Action (1080p)
+http://23.239.31.26:8989/ssaction/index.m3u8
+#EXTINF:-1 tvg-id="SuperSportTennis.za@SD",SuperSport Tennis (1080p)
+https://live20.bozztv.com/dvrfl05/sstennis/index.m3u8
+#EXTINF:-1 tvg-id="HBOHD.us@SD",HBO HD (1080p)
+http://23.239.31.26:8989/hbo/index.m3u8
+#EXTINF:-1 tvg-id="CinemaxHD.us@SD",Cinemax HD (1080p)
+https://live20.bozztv.com/dvrfl05/cinemax/index.m3u8
+#EXTINF:-1 tvg-id="NatGeo.us@SD",National Geographic HD (1080p)
+https://webstream.multistream.it/memfs/natgeo.m3u8
+#EXTINF:-1 tvg-id="Discovery.us@SD",Discovery Channel (1080p)
+https://strhls.streamakaci.tv/discovery/playlist.m3u8
+#EXTINF:-1 tvg-id="BBCNews.uk@SD",BBC News 24 (720p)
+http://23.239.31.26:8989/bbcnews/index.m3u8
+#EXTINF:-1 tvg-id="CNN.us@SD",CNN International (720p)
+https://live20.bozztv.com/dvrfl05/cnn/index.m3u8
+#EXTINF:-1 tvg-id="AlJazeera.qa@SD",Al Jazeera English (720p)
+https://webstream.multistream.it/memfs/aljazeera.m3u8
+#EXTINF:-1 tvg-id="AzamKids.tz@SD",Azam Kids TV (720p)
+https://strhls.streamakaci.tv/azamkids/playlist.m3u8
+#EXTINF:-1 tvg-id="EFMTV.tz@SD",EFM TV Tanzania (720p)
+http://23.239.31.26:8989/efmtv/index.m3u8
+#EXTINF:-1 tvg-id="SuperSportFootball.za@SD",SuperSport Football (1080p)
+https://live20.bozztv.com/dvrfl05/ssfootball/index.m3u8
+#EXTINF:-1 tvg-id="MTVBase.za@SD",MTV Base Africa (1080p)
+http://23.239.31.26:8989/mtvbase/index.m3u8
+#EXTINF:-1 tvg-id="TraceUrban.fr@SD",Trace Urban (1080p)
+https://live20.bozztv.com/dvrfl05/traceurban/index.m3u8
+#EXTINF:-1 tvg-id="ParamountNetwork.us@SD",Paramount Network HD (1080p)
+https://webstream.multistream.it/memfs/paramount/index.m3u8
+#EXTINF:-1 tvg-id="FoxNews.us@SD",Fox News Channel (720p)
+https://strhls.streamakaci.tv/foxnews/playlist.m3u8
+#EXTINF:-1 tvg-id="SkyNews.uk@SD",Sky News International (720p)
+http://23.239.31.26:8989/skynews/index.m3u8
+#EXTINF:-1 tvg-id="TBC1.tz@SD",TBC 1 Tanzania (720p)
+https://live20.bozztv.com/dvrfl05/tbc1/index.m3u8
+#EXTINF:-1 tvg-id="WasafiTV.tz@SD",Wasafi TV Tanzania (720p)
+https://webstream.multistream.it/memfs/wasafitv/index.m3u8
+#EXTINF:-1 tvg-id="AzamSports4.tz@SD",Azam Sports 4 HD (1080p)
+https://strhls.streamakaci.tv/azamsports4/playlist.m3u8
+#EXTINF:-1 tvg-id="SuperSportBlitz.za@SD",SuperSport Blitz (1080p)
+http://23.239.31.26:8989/ssblitz/index.m3u8
+#EXTINF:-1 tvg-id="Eurosport1.fr@SD",Eurosport 1 HD (1080p)
+https://live20.bozztv.com/dvrfl05/eurosport1/index.m3u8
