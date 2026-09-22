@@ -4,11 +4,29 @@ import path from "path";
 
 export const revalidate = 0;
 
+// Kitendakazi cha kupanga chaneli kwenye makundi safi ya kisasa bila kuleta nchi za ovyo
+function getSmartCategory(name: string, originalGroup: string): string {
+  const lower = (name + " " + originalGroup).toLowerCase();
+  
+  if (/sport|michezo|football|soccer|espn|supersport|azam sports|bt sport|bein|ufc|wwe/i.test(lower)) {
+    return "Michezo & Live Sports";
+  }
+  if (/movie|cinema|hbo|cinemax|vod|action|netflix|hollywood|series|drama/i.test(lower)) {
+    return "Filamu & Series (VOD)";
+  }
+  if (/news|habari|bbc|cnn|al jazeera|tbc|sky news|fox news|dw|rt/i.test(lower)) {
+    return "Habari & Dunia (News)";
+  }
+  if (/tanzania|wasafi|azam|east africa|ebony|swahili|tbc1|cloudstv|efm/i.test(lower)) {
+    return "Tanzania & Local TV";
+  }
+  return "Burudani & General TV";
+}
+
 export async function GET() {
   try {
     let rawData = "";
 
-    // 1. Angalia kama faili la sports.m3u lipo kwenye public folder
     const sportsPath = path.join(process.cwd(), "public", "sports.m3u");
     const rootPlaylistPath = path.join(process.cwd(), "playlist.m3u");
 
@@ -17,7 +35,6 @@ export async function GET() {
     } else if (fs.existsSync(rootPlaylistPath)) {
       rawData = fs.readFileSync(rootPlaylistPath, "utf-8");
     } else {
-      // 2. Kama halipo, jaribu kuvuta kupitia IPTV_M3U_URL kama ipo
       const m3uUrl = process.env.IPTV_M3U_URL;
       if (m3uUrl) {
         const response = await fetch(m3uUrl, {
@@ -44,7 +61,7 @@ export async function GET() {
         const name = nameMatch ? nameMatch[1].trim() : "Channel";
 
         const groupMatch = rawLine.match(/group-title="([^"]+)"/i);
-        const group = groupMatch ? groupMatch[1].trim() : "Live TV & Channels";
+        const originalGroup = groupMatch ? groupMatch[1].trim() : "General";
 
         const logoMatch = rawLine.match(/tvg-logo="([^"]+)"/i);
         const logo = logoMatch ? logoMatch[1].trim() : "";
@@ -52,9 +69,13 @@ export async function GET() {
         const idMatch = rawLine.match(/tvg-id="([^"]+)"/i);
         const id = idMatch ? idMatch[1].trim() : Math.random().toString(36).substring(7);
 
+        // Tumia Smart Categorizer kusafisha makundi ya kijinga ya nchi
+        const group = getSmartCategory(name, originalGroup);
+
         currentChannel = { id, name, group, logo, url: "" };
       } else if (line && !line.startsWith("#") && currentChannel) {
         currentChannel.url = line;
+        
         if (!categoriesMap[currentChannel.group]) {
           categoriesMap[currentChannel.group] = [];
         }
